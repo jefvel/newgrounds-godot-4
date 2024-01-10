@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://dj40pbd1sp38k"]
+
+[ext_resource type="PackedScene" uid="uid://xcwcga3on6gp" path="res://addons/newgrounds/examples/newgrounds_debug.tscn" id="1_bp2je"]
+
+[node name="ExampleScene" type="Node2D"]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="NewgroundsDebugExamples" parent="CanvasLayer" instance=ExtResource("1_bp2je")]

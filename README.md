@@ -2,9 +2,7 @@
 
 ## Quick start
 
-Install the addon, and enable the addon.
-
-Go to the project settings and look for `Newgrounds.io`.
+Install and enable the addon. Go to the project settings and look for `Newgrounds.io`.
 In there, add the app ID and encryption key found on the Newgrounds project page.
 
 ![Configure the addon](/images/project_settings.png)

@@ -15,8 +15,24 @@ Once this is done, you are ready to go! The nodes `NG` and `NGCloudSave` are acc
 
 When running the game on Newgrounds, you should be signed in automatically once the addon is initialized.
 
-However, to manually do this, you can call `NG.sign_in()` and `NG.sign_out()`.
-To track the signed in status, connect to the signal `NG.on_signed_in` and `NG.in_signed_out`
+```gdscript
+# Manually sign in, will launch newgrounds passport
+NG.sign_in()
+
+# Signing out, ending the session
+NG.sign_out()
+
+# Track session changes
+NG.on_session_change.connect(session_change)
+
+# ...
+
+func session_change(s : NewgroundsSession):
+	if s.signed_in():
+		print("Signed in")
+	else:
+		print("Not signed in")
+```
 
 ### Unlock medal
 
@@ -48,38 +64,38 @@ It also has a signal `on_unlock(medal)`, and the property `unlocked` to check if
 The `NG` node contains various methods for calling the Newgrounds API, they all return a `NewgroundsRequest`:
 
 ```gdscript
-	NG.ping()
+NG.ping()
 
-	NG.session_start()
-	NG.session_check()
-	NG.session_end()
+NG.session_start()
+NG.session_check()
+NG.session_end()
 
-	NG.scoreboard_list();
-	NG.scoreboard_get_scores(id, limit, skip, period, social, user, tag)
-	NG.scoreboard_submit(id, value)
-	NG.scoreboard_submit_time(id, seconds)
+NG.scoreboard_list();
+NG.scoreboard_get_scores(id, limit, skip, period, social, user, tag)
+NG.scoreboard_submit(id, value)
+NG.scoreboard_submit_time(id, seconds)
 
-	NG.medal_get_list()
-	NG.medal_unlock(id)
-	NG.medal_get_medal_score()
+NG.medal_get_list()
+NG.medal_unlock(id)
+NG.medal_get_medal_score()
 
-	NG.cloudsave_load_slots()
-	NG.cloudsave_load_slot(slot_id)
-	NG.cloudsave_clear_slot(slot_id)
-	NG.cloudsave_get_data(slot_id)
-	NG.cloudsave_set_data(slot_id, data_string)
+NG.cloudsave_load_slots()
+NG.cloudsave_load_slot(slot_id)
+NG.cloudsave_clear_slot(slot_id)
+NG.cloudsave_get_data(slot_id)
+NG.cloudsave_set_data(slot_id, data_string)
 ```
 
 You can listen to the request done by these calls:
 
 ```gdscript
-	func get_scoreboards():
-		var req = NG.scoreboard_list();
-		req.on_success.connect(on_success)
-		req.on_error.connect(on_error)
+func get_scoreboards():
+	var req = NG.scoreboard_list();
+	req.on_success.connect(on_success)
+	req.on_error.connect(on_error)
 
-	func on_success(scoreboards):
-		print(scoreboards)
-	func on_error(error):
-		print(error)
+func on_success(scoreboards):
+	print(scoreboards)
+func on_error(error):
+	print(error)
 ```

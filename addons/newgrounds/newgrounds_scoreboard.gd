@@ -127,10 +127,10 @@ func refresh():
 func _get_failure(error):
 	refreshing = false;
 
-func _score_get(res):
+func _score_get(new_scores):
 	refreshing = false;
 	var index = page * page_size + 1;
-	var score_count = res.scores.size()
+	var score_count = new_scores.size()
 	
 	if score_count < page_size:
 		reached_end = true;
@@ -143,7 +143,7 @@ func _score_get(res):
 			return;
 	
 	scores = [];
-	for score in res.scores:
+	for score in new_scores:
 		var s = ScoreboardItem.fromDict(score);
 		s.index = index;
 		scores.push_back(s)

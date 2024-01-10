@@ -17,15 +17,28 @@ func is_signed_in():
 	return user != null;
 
 func setFromDictionary(d:Dictionary):
+	var dirty = false
+	
+	if expired != d.expired:
+		dirty = true
 	expired = d.expired;
+	
+	if id != d.id:
+		dirty = true;
 	id = d.id;
+	
 	remember = d.remember;
 	
 	if (d.has("passport_url")):
 		passport_url = d.passport_url;
-	if d.user:
+	var had_user = user != null
+	var has_user = d.user != null
+	if has_user:
 		var u = d.user;
 		user = NewgroundsUser.fromDict(u);
+	if has_user != had_user:
+		dirty = true
+	return dirty
 	
 
 func save():

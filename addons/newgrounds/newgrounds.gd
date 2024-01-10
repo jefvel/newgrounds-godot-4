@@ -76,10 +76,10 @@ func ping() -> NewgroundsRequest:
 ## Session stuff
 #############
 func session_start(force: bool = false) -> NewgroundsRequest:
-	return request("App.startSession", { "force": force }, _session_change)
+	return request("App.startSession", { "force": force }, "session", _session_change)
 
 func session_end() -> NewgroundsRequest:
-	return request("App.endSession", null, _on_session_end)
+	return request("App.endSession", null, "", _on_session_end)
 func _on_session_end(data):
 	session = NewgroundsSession.new();
 	on_session_change.emit(session)
@@ -87,7 +87,7 @@ func _on_session_end(data):
 	pass
 
 func session_check() -> NewgroundsRequest:
-	return request("App.checkSession", null, _session_change)
+	return request("App.checkSession", null, "session", _session_change)
 
 func _session_change(data):
 	if (!data.success):
@@ -102,7 +102,8 @@ func _session_change(data):
 		return
 	
 	var s = data.result.data.session;
-	session.setFromDictionary(s)
+	var changed = session.setFromDictionary(s)
+	
 	session_started = true;
 	
 	if (!signed_in && session.user):
@@ -115,13 +116,14 @@ func _session_change(data):
 		
 	_save_session()
 	
-	on_session_change.emit(session);
+	if changed:
+		on_session_change.emit(session);
 	pass
 
 ## Scoreboards
 ###############
 func scoreboard_list() -> NewgroundsRequest:
-	return request("ScoreBoard.getBoards", null, _on_scoreboards_get)
+	return request("ScoreBoard.getBoards", null, "scoreboards", _on_scoreboards_get)
 func _on_scoreboards_get(m):
 	if !m.success:
 		return
@@ -142,21 +144,14 @@ func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, per
 		params.user = user;
 	if tag:
 		params.tag = tag;
-	return request("ScoreBoard.getScores", params, _on_scores_get)
-func _on_scores_get(m):
-	if !m.success:
-		return
-	var d = m.result.data;
-	if !d.success:
-		return
-	pass
+	return request("ScoreBoard.getScores", params, "scores")
 
 func scoreboard_submit(scoreboard_id: int, score: int) -> NewgroundsRequest:
-	var req = request("ScoreBoard.postScore", {"id": scoreboard_id, "value": score})
+	var req = request("ScoreBoard.postScore", {"id": scoreboard_id, "value": score}, "score")
 	req.on_success.connect(_on_highscore_submitted.bind(scoreboard_id))
 	return req;
-func _on_highscore_submitted(d, scoreboard_id):
-	on_highscore_submitted.emit(scoreboard_id, ScoreboardItem.fromDict(d.score));
+func _on_highscore_submitted(score, scoreboard_id):
+	on_highscore_submitted.emit(scoreboard_id, ScoreboardItem.fromDict(score));
 	pass
 
 
@@ -169,12 +164,12 @@ func scoreboard_submit_time(scoreboard_id: int, seconds: float) -> NewgroundsReq
 
 ## Lists medals, emits on_medals_loaded
 func medal_get_list() -> NewgroundsRequest:
-	var req = request("Medal.getList", null)
+	var req = request("Medal.getList", null, "medals")
 	req.on_success.connect(_on_medals_get)
 	return req;
 func _on_medals_get(m):
 	var medals_list:Array[MedalResource] = [];
-	for medal in m.medals:
+	for medal in m:
 		var medal_res = get_medal_resource(medal.id)
 		if !medal_res:
 			medal_res = MedalResource.fromDict(medal);
@@ -187,7 +182,7 @@ func _on_medals_get(m):
 
 ## Unlocks medal. emits on_medal_unlocked on success
 func medal_unlock(medal_id: int) -> NewgroundsRequest:
-	var req = request("Medal.unlock", { "id": medal_id })
+	var req = request("Medal.unlock", { "id": medal_id }, "medal")
 	req.on_success.connect(_on_medal_unlock);
 	req.on_error.connect(_on_medal_fail.bind(medal_id));
 	return req;
@@ -195,11 +190,11 @@ func _on_medal_fail(error, medal_id):
 	session._failed_medal_unlocks.push_back(medal_id);
 	session.save()
 func _on_medal_unlock(m):
-	var medal = get_medal_resource(m.medal.id);
+	var medal = get_medal_resource(m.id);
 	if medal:
 		medal.unlocked = true;
 	else:
-		medal = MedalResource.fromDict(m.medal);
+		medal = MedalResource.fromDict(m);
 		medals[medal.id] = medal;
 	on_medal_unlocked.emit(medal)
 	pass
@@ -320,7 +315,7 @@ func _on_cloudsave_get_data(data, slot: NewgroundsSaveSlot):
 	pass
 	
 
-func request(component, parameters, callable = null) -> NewgroundsRequest:
+func request(component, parameters, field_name: String = "", callable = null) -> NewgroundsRequest:
 	print(component)
 	
 	var request = NewgroundsRequest.new()
@@ -330,7 +325,7 @@ func request(component, parameters, callable = null) -> NewgroundsRequest:
 	if callable:
 		request.request_completed.connect(_request_completed.bind(callable))
 	
-	request.create(component, parameters)
+	request.create(component, parameters, field_name)
 	return request
 
 func _request_completed(result, response_code, headers, body, callable: Callable):

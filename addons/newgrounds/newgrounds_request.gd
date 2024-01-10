@@ -18,6 +18,8 @@ var session: NewgroundsSession;
 
 var aes: AESContext;
 
+var _result_field = ""
+
 func init(app_id: String, aes_key: String, session:NewgroundsSession = NewgroundsSession.new(), aes_context = AESContext.new()):
 	self.app_id = app_id;
 	
@@ -26,7 +28,8 @@ func init(app_id: String, aes_key: String, session:NewgroundsSession = Newground
 	self.session = session;
 	self.aes = aes_context;
 	
-func create(component, parameters, encrypt = true) -> HTTPRequest:
+func create(component, parameters, result_field = "", encrypt = true) -> HTTPRequest:
+	_result_field = result_field
 	request_completed.connect(_request_completed)
 	
 	var call_parameters = {
@@ -123,7 +126,10 @@ func _request_completed(result, response_code, headers, body):
 		on_error.emit(d.error)
 		return
 	
-	on_success.emit(d);
+	if _result_field:
+		on_success.emit(d[_result_field])
+	else:
+		on_success.emit(d);
 	pass
 
 func generate_iv() -> PackedByteArray:

@@ -6,7 +6,7 @@ var medal_list = [];
 
 func _ready():
 	_refresh_list(NG.medals.values())
-	
+	NG.medal_get_list()
 	NG.on_medal_unlocked.connect(_on_medal_unlocked)
 	NG.on_medals_loaded.connect(_refresh_list)
 	pass # Replace with function body.

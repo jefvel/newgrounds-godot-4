@@ -1,0 +1,168 @@
+[gd_scene load_steps=6 format=3 uid="uid://xcwcga3on6gp"]
+
+[ext_resource type="Script" path="res://addons/newgrounds/examples/newgrounds_debug.gd" id="1_e2xbo"]
+[ext_resource type="Script" path="res://addons/newgrounds/examples/ExampleSaveData.gd" id="2_5kj3a"]
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_image.gd" id="2_wqp6l"]
+[ext_resource type="PackedScene" uid="uid://b2rnbblsa42pm" path="res://addons/newgrounds/examples/example_scoreboard.tscn" id="3_gp5e1"]
+[ext_resource type="PackedScene" uid="uid://cafxm6acw5lcl" path="res://addons/newgrounds/examples/example_medal_list.tscn" id="4_lqp0p"]
+
+[node name="NewgroundsDebugExamples" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_e2xbo")
+
+[node name="ExampleSaveData" type="Control" parent="." groups=["CloudSave"]]
+anchors_preset = 0
+offset_left = 34.0
+offset_top = 448.0
+offset_right = 34.0
+offset_bottom = 448.0
+script = ExtResource("2_5kj3a")
+
+[node name="TextEdit" type="TextEdit" parent="ExampleSaveData"]
+layout_mode = 0
+offset_right = 273.0
+offset_bottom = 179.0
+
+[node name="Log In" type="Button" parent="."]
+layout_mode = 1
+offset_left = 34.0
+offset_top = 25.0
+offset_right = 171.0
+offset_bottom = 56.0
+text = "Log in"
+
+[node name="Check Session" type="Button" parent="."]
+layout_mode = 1
+offset_left = 31.0
+offset_top = 68.0
+offset_right = 165.0
+offset_bottom = 99.0
+text = "Check session"
+
+[node name="List Medals" type="Button" parent="."]
+layout_mode = 1
+offset_left = 34.0
+offset_top = 105.0
+offset_right = 173.0
+offset_bottom = 136.0
+text = "List Medals"
+
+[node name="List Scoreboards" type="Button" parent="."]
+layout_mode = 1
+offset_left = 31.0
+offset_top = 139.0
+offset_right = 167.0
+offset_bottom = 170.0
+text = "List Scoreboards"
+
+[node name="Submit Score" type="Button" parent="."]
+layout_mode = 1
+offset_left = 34.0
+offset_top = 179.0
+offset_right = 170.0
+offset_bottom = 210.0
+text = "Post Score"
+
+[node name="Load Saveslots" type="Button" parent="."]
+layout_mode = 1
+offset_left = 31.0
+offset_top = 224.0
+offset_right = 167.0
+offset_bottom = 255.0
+text = "Load Saveslots"
+
+[node name="Save Slot" type="Button" parent="."]
+layout_mode = 1
+offset_left = 34.0
+offset_top = 283.0
+offset_right = 170.0
+offset_bottom = 314.0
+text = "Set Slot Data"
+
+[node name="Get Slot Data" type="Button" parent="."]
+layout_mode = 1
+offset_left = 34.0
+offset_top = 327.0
+offset_right = 170.0
+offset_bottom = 358.0
+text = "Get Slot Data
+"
+
+[node name="Clear Slot" type="Button" parent="."]
+layout_mode = 1
+offset_left = 31.0
+offset_top = 373.0
+offset_right = 167.0
+offset_bottom = 404.0
+text = "Clear slot data"
+
+[node name="Profile" type="Button" parent="."]
+layout_mode = 0
+offset_left = 174.0
+offset_top = 39.0
+offset_right = 364.0
+offset_bottom = 99.0
+tooltip_text = "Open Profile URL"
+mouse_default_cursor_shape = 2
+flat = true
+
+[node name="Avatar" type="Control" parent="Profile"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_right = 62.0
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="NewgroundsImage" type="TextureRect" parent="Profile/Avatar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_wqp6l")
+
+[node name="UserName" type="Label" parent="Profile"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -119.0
+offset_right = -12.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "asdf"
+vertical_alignment = 1
+
+[node name="ExampleScoreboard" parent="." instance=ExtResource("3_gp5e1")]
+layout_mode = 0
+offset_left = 422.0
+offset_top = 57.0
+offset_right = 688.0
+offset_bottom = 422.0
+
+[node name="ExampleMedalList" parent="." instance=ExtResource("4_lqp0p")]
+offset_left = 885.0
+offset_top = 40.0
+offset_right = 1111.0
+offset_bottom = 405.0
+
+[connection signal="text_changed" from="ExampleSaveData/TextEdit" to="ExampleSaveData" method="_on_text_edit_text_changed"]
+[connection signal="pressed" from="Log In" to="." method="_on_log_in_pressed"]
+[connection signal="pressed" from="Check Session" to="." method="_on_check_session_pressed"]
+[connection signal="pressed" from="List Medals" to="." method="_on_check_session_2_pressed"]
+[connection signal="pressed" from="List Scoreboards" to="." method="_on_list_scoreboards_pressed"]
+[connection signal="pressed" from="Submit Score" to="." method="_on_submit_score_pressed"]
+[connection signal="pressed" from="Load Saveslots" to="." method="_on_load_saveslots_pressed"]
+[connection signal="pressed" from="Save Slot" to="." method="_on_save_slot_pressed"]
+[connection signal="pressed" from="Get Slot Data" to="." method="_on_get_slot_data_pressed"]
+[connection signal="pressed" from="Clear Slot" to="." method="_on_clear_slot_pressed"]
+[connection signal="pressed" from="Profile" to="." method="_on_profile_pressed"]

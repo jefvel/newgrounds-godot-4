@@ -1,0 +1,44 @@
+[gd_scene load_steps=2 format=3 uid="uid://cafxm6acw5lcl"]
+
+[ext_resource type="Script" path="res://addons/newgrounds/examples/example_medal_list.gd" id="1_ktfmy"]
+
+[node name="ExampleMedalList" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 226.0
+offset_bottom = 324.0
+script = ExtResource("1_ktfmy")
+
+[node name="Container" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.705882, 0.403922, 0.117647, 1)
+
+[node name="Content" type="Control" parent="Container"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -5.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ItemList" type="ItemList" parent="Container/Content"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+allow_reselect = true
+fixed_icon_size = Vector2i(50, 50)
+
+[connection signal="item_clicked" from="Container/Content/ItemList" to="." method="_on_item_list_item_clicked"]
+[connection signal="item_selected" from="Container/Content/ItemList" to="." method="_on_item_list_item_clicked"]

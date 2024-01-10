@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://cx0lbddb6da4w"]
+
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds.gd" id="1_426xc"]
+
+[node name="Newgrounds" type="Node"]
+script = ExtResource("1_426xc")
+
+[node name="Pinger" type="Timer" parent="."]
+wait_time = 60.0
+
+[connection signal="timeout" from="Pinger" to="." method="check_session"]

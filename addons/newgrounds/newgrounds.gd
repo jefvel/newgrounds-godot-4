@@ -22,8 +22,8 @@ func get_medal_resource(medal_id: int) -> MedalResource:
 		return medals[medal_id];
 	return null
 
-### Stores the user's total medal score, fetched with medal_get_medal_score()
-var medal_score: int = 0;
+
+var medal_score: int = 0; ## Stores the user's total medal score, fetched with medal_get_medal_score()
 signal on_medals_loaded(medals:Array[MedalResource]);
 signal on_medal_unlocked(medal:MedalResource);
 signal on_medal_score_get(score:int);

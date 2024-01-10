@@ -79,8 +79,6 @@ func medals_get(medals):
 		DirAccess.make_dir_absolute(medal_dir)
 	var used_names = {}
 	for m in medals.medals:
-		#var cleaned_name = _clean_name(m.name);
-		#var resource_name = "%s/%s_%s.tres" % [medal_dir, cleaned_name, m.id]
 		var resource_name = "%s/%s.tres" % [medal_dir, m.id]
 		var medal:MedalResource;
 		if ResourceLoader.exists(resource_name):

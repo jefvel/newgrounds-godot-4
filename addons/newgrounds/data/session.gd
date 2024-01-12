@@ -7,11 +7,19 @@ var expired: bool = false;
 var passport_url: String = "";
 var remember: bool = true;
 
-
 var user: NewgroundsUser = null;
 
 var _failed_medal_unlocks:Array[int] = [];
 var _failed_highscore_posts:Array = [];
+
+func reset():
+	id = ""
+	expired = false
+	passport_url = ""
+	remember = true
+	user = null
+	_failed_highscore_posts = []
+	_failed_medal_unlocks = []
 
 func is_signed_in():
 	return user != null;

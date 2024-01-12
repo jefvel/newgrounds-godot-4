@@ -5,7 +5,10 @@ extends Control
 func _ready():
 	NG.on_session_change.connect(sessionChange)
 	sessionChange(NG.session)
-
+	
+func test():
+	
+	pass
 @onready var newgrounds_image = $Profile/Avatar/NewgroundsImage
 @onready var user_name = $Profile/UserName
 
@@ -37,7 +40,7 @@ func _on_check_session_2_pressed():
 
 
 func _on_list_scoreboards_pressed():
-	NG.scoreboard_list()
+	NG.scoreboards_get()
 	pass # Replace with function body.
 
 

@@ -18,3 +18,4 @@ addons/newgrounds/imported_medals
 addons/newgrounds/newgrounds_ids.gd
 
 *.sav
+*.tmp

@@ -3,10 +3,14 @@ extends HTTPRequest
 ## Should only be used in code.
 class_name NewgroundsRequest
 
+const ERR_INVALID_SESSION = 104;
+
 const gateway_uri:String = "https://newgrounds.io/gateway_v3.php"
 
 signal on_success(data);
 signal on_error(error);
+
+signal on_response(response: NewgroundsResponse);
 
 signal on_cancel();
 
@@ -108,28 +112,46 @@ func _request_completed(result, response_code, headers, body):
 	queue_free()
 	pending = false;
 	
+	var resp = NewgroundsResponse.new()
+	
 	var body_string = body.get_string_from_utf8()
 	
 	if _custom_call:
 		if response_code == 200:
 			on_success.emit(body_string)
 		else:
+			resp.error = FAILED
+			resp.error_message = body_string
+			on_response.emit(resp)
 			on_error.emit(body_string);
 		return
 	
 	var res = JSON.parse_string(body_string)
 	if !res.success:
 		on_error.emit(res.error)
+		
+		resp.error = FAILED
+		resp.error_message = res.error
+		on_response.emit(resp)
 		return
+	
 	var d = res.result.data;
 	if !d.success:
 		on_error.emit(d.error)
+		
+		resp.error = d.error.code
+		resp.error_message = d.error.message
+		on_response.emit(resp)
 		return
 	
 	if _result_field:
 		on_success.emit(d[_result_field])
+		resp.data = d[_result_field]
 	else:
 		on_success.emit(d);
+		resp.data = d
+	
+	on_response.emit(resp);
 	pass
 
 func generate_iv() -> PackedByteArray:
@@ -138,3 +160,4 @@ func generate_iv() -> PackedByteArray:
 	for i in range(16):
 		arr.set(i, randi() % 0xff)
 	return arr
+

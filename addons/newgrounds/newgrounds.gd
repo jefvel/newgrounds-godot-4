@@ -4,6 +4,8 @@ var app_id:String;
 var aes_key:String;
 var auto_init: bool;
 
+@onready var components:NewgroundsComponents = $Components
+
 var session: NewgroundsSession = NewgroundsSession.new();
 var session_started: bool = false;
 
@@ -21,7 +23,6 @@ func get_medal_resource(medal_id: int) -> MedalResource:
 	if medals.has(medal_id):
 		return medals[medal_id];
 	return null
-
 
 var medal_score: int = 0; ## Stores the user's total medal score, fetched with medal_get_medal_score()
 signal on_medals_loaded(medals:Array[MedalResource]);
@@ -56,6 +57,8 @@ func _ready():
 	assert(aes_bits == 256 || aes_bits == 128, "Newgrounds AES Key Required (Assign it in the project settings)")
 	assert(app_id, "Newgrounds App ID Required (Assign it in the project settings)")
 	
+	components.init(app_id, aes_key, session)
+	
 	if auto_init:
 		init();
 	pass
@@ -68,40 +71,36 @@ func _init_medals():
 	pass
 
 func init():
-	session_check()
+	_refresh_session()
 
-func ping() -> NewgroundsRequest:
-	return request("Gateway.ping", null)
+func _refresh_session() -> NewgroundsRequest:
+	var res = components.app_check_session()
+	res.on_response.connect(_session_change)
+	return res
 
 ## Session stuff
 #############
 func session_start(force: bool = false) -> NewgroundsRequest:
-	return request("App.startSession", { "force": force }, "session", _session_change)
+	var req = components.app_start_session()
+	req.on_response.connect(_session_change)
+	return req
+	#return request("App.startSession", { "force": force }, "session", _session_change)
 
-func session_end() -> NewgroundsRequest:
-	return request("App.endSession", null, "", _on_session_end)
-func _on_session_end(data):
-	session = NewgroundsSession.new();
-	on_session_change.emit(session)
-	on_signed_out.emit();
-	pass
 
-func session_check() -> NewgroundsRequest:
-	return request("App.checkSession", null, "session", _session_change)
 
-func _session_change(data):
-	if (!data.success):
-		$Pinger.stop()
-		return
-	
-	var call = data.result.data;
-	if (!call.success):
+func session_check():
+	var res = await components.app_check_session().on_response
+	_session_change(res)
+	return res
+
+func _session_change(data:NewgroundsResponse):
+	if (data.error):
 		if !session_started:
 			$Pinger.stop()
 			session_start()
 		return
 	
-	var s = data.result.data.session;
+	var s = data.data;
 	var changed = session.setFromDictionary(s)
 	
 	session_started = true;
@@ -122,6 +121,14 @@ func _session_change(data):
 
 ## Scoreboards
 ###############
+func scoreboards_get():
+	var req = components.scoreboard_get_boards()
+	var res = await req.on_response
+	if !res.error:
+		on_scoreboards_loaded.emit(res.data);
+	else:
+		print("Newgrounds.io - error : " + res.error_string)
+
 func scoreboard_list() -> NewgroundsRequest:
 	return request("ScoreBoard.getBoards", null, "scoreboards", _on_scoreboards_get)
 func _on_scoreboards_get(m):
@@ -209,12 +216,17 @@ func _on_medal_get_medal_score(data):
 
 ## Signs the user out from newgrounds.io and ends the current session
 func sign_out():
-	var req = session_end()
-	session = NewgroundsSession.new()
+	await components.app_end_session().on_response
+	
+	session.reset()
+	session.save()
 	signed_in = false;
 	session_started = false;
 	signing_in = false;
 	$Pinger.stop()
+	
+	on_session_change.emit(session)
+	on_signed_out.emit();
 	pass
 
 ## Starts a session & launches newgrounds passport in case user
@@ -228,7 +240,9 @@ func sign_in():
 		OS.shell_open(session.passport_url)
 	else:
 		var req = session_start()
-		req.on_success.connect(_retry_signin, CONNECT_ONE_SHOT)
+		await req.on_response
+		# retry signin
+		sign_in()
 	pass
 
 func _retry_signin(s):

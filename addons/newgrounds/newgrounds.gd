@@ -86,8 +86,6 @@ func session_start(force: bool = false) -> NewgroundsRequest:
 	return req
 	#return request("App.startSession", { "force": force }, "session", _session_change)
 
-
-
 func session_check():
 	var res = await components.app_check_session().on_response
 	_session_change(res)
@@ -208,11 +206,11 @@ func _on_medal_unlock(m):
 
 ## Fetch the user's total score, emitted by on_medal_score_get
 func medal_get_medal_score() -> NewgroundsRequest:
-	var req = request("Medal.getMedalScore", null);
-	req.on_success.connect(_on_medal_get_medal_score)
+	var req = components.medal_get_medal_score()
+	req.on_response.connect(_on_medal_get_medal_score)
 	return req;
 func _on_medal_get_medal_score(data):
-	on_medal_score_get.emit(data.medal_score);
+	on_medal_score_get.emit(data.data);
 
 ## Signs the user out from newgrounds.io and ends the current session
 func sign_out():

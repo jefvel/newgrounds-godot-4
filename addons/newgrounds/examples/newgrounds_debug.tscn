@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://xcwcga3on6gp"]
+[gd_scene load_steps=7 format=3 uid="uid://xcwcga3on6gp"]
 
 [ext_resource type="Script" path="res://addons/newgrounds/examples/newgrounds_debug.gd" id="1_e2xbo"]
 [ext_resource type="Script" path="res://addons/newgrounds/examples/ExampleSaveData.gd" id="2_5kj3a"]
-[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_image.gd" id="2_wqp6l"]
 [ext_resource type="PackedScene" uid="uid://b2rnbblsa42pm" path="res://addons/newgrounds/examples/example_scoreboard.tscn" id="3_gp5e1"]
+[ext_resource type="PackedScene" uid="uid://dgf2xfu4r0mtd" path="res://addons/newgrounds/newgrounds_user_avatar.tscn" id="3_vopvl"]
 [ext_resource type="PackedScene" uid="uid://cafxm6acw5lcl" path="res://addons/newgrounds/examples/example_medal_list.tscn" id="4_lqp0p"]
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="6_16v52"]
 
 [node name="NewgroundsDebugExamples" type="Control"]
 layout_mode = 3
@@ -25,109 +26,102 @@ script = ExtResource("2_5kj3a")
 
 [node name="TextEdit" type="TextEdit" parent="ExampleSaveData"]
 layout_mode = 0
-offset_right = 273.0
-offset_bottom = 179.0
+offset_left = -4.0
+offset_top = -26.0
+offset_right = 269.0
+offset_bottom = 153.0
 
 [node name="Log In" type="Button" parent="."]
 layout_mode = 1
-offset_left = 34.0
+offset_left = 30.0
 offset_top = 25.0
-offset_right = 171.0
+offset_right = 170.0
 offset_bottom = 56.0
 text = "Log in"
 
 [node name="Check Session" type="Button" parent="."]
 layout_mode = 1
-offset_left = 31.0
-offset_top = 68.0
-offset_right = 165.0
-offset_bottom = 99.0
+offset_left = 30.0
+offset_top = 64.0
+offset_right = 170.0
+offset_bottom = 95.0
 text = "Check session"
 
 [node name="List Medals" type="Button" parent="."]
 layout_mode = 1
-offset_left = 34.0
-offset_top = 105.0
-offset_right = 173.0
-offset_bottom = 136.0
+offset_left = 30.0
+offset_top = 103.0
+offset_right = 170.0
+offset_bottom = 134.0
 text = "List Medals"
 
 [node name="List Scoreboards" type="Button" parent="."]
 layout_mode = 1
-offset_left = 31.0
-offset_top = 139.0
-offset_right = 167.0
-offset_bottom = 170.0
+offset_left = 30.0
+offset_top = 142.0
+offset_right = 170.0
+offset_bottom = 173.0
 text = "List Scoreboards"
 
 [node name="Submit Score" type="Button" parent="."]
 layout_mode = 1
-offset_left = 34.0
-offset_top = 179.0
+offset_left = 30.0
+offset_top = 181.0
 offset_right = 170.0
-offset_bottom = 210.0
+offset_bottom = 212.0
 text = "Post Score"
 
 [node name="Load Saveslots" type="Button" parent="."]
 layout_mode = 1
-offset_left = 31.0
-offset_top = 224.0
-offset_right = 167.0
-offset_bottom = 255.0
+offset_left = 30.0
+offset_top = 221.0
+offset_right = 170.0
+offset_bottom = 252.0
 text = "Load Saveslots"
 
 [node name="Save Slot" type="Button" parent="."]
 layout_mode = 1
-offset_left = 34.0
-offset_top = 283.0
+offset_left = 30.0
+offset_top = 260.0
 offset_right = 170.0
-offset_bottom = 314.0
+offset_bottom = 291.0
 text = "Set Slot Data"
 
 [node name="Get Slot Data" type="Button" parent="."]
 layout_mode = 1
-offset_left = 34.0
-offset_top = 327.0
+offset_left = 30.0
+offset_top = 300.0
 offset_right = 170.0
-offset_bottom = 358.0
+offset_bottom = 331.0
 text = "Get Slot Data
 "
 
 [node name="Clear Slot" type="Button" parent="."]
 layout_mode = 1
-offset_left = 31.0
-offset_top = 373.0
-offset_right = 167.0
-offset_bottom = 404.0
+offset_left = 30.0
+offset_top = 340.0
+offset_right = 170.0
+offset_bottom = 371.0
 text = "Clear slot data"
 
 [node name="Profile" type="Button" parent="."]
 layout_mode = 0
-offset_left = 174.0
-offset_top = 39.0
-offset_right = 364.0
-offset_bottom = 99.0
+offset_left = 191.0
+offset_top = 25.0
+offset_right = 381.0
+offset_bottom = 85.0
 tooltip_text = "Open Profile URL"
 mouse_default_cursor_shape = 2
 flat = true
 
-[node name="Avatar" type="Control" parent="Profile"]
+[node name="NewgroundsUserAvatar" parent="Profile" instance=ExtResource("3_vopvl")]
 layout_mode = 1
 anchors_preset = 9
+anchor_right = 0.0
 anchor_bottom = 1.0
-offset_left = 2.0
-offset_right = 62.0
-grow_vertical = 2
-mouse_filter = 1
-
-[node name="NewgroundsImage" type="TextureRect" parent="Profile/Avatar"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("2_wqp6l")
+offset_right = 60.0
+offset_bottom = 0.0
+grow_horizontal = 1
 
 [node name="UserName" type="Label" parent="Profile"]
 layout_mode = 1
@@ -135,11 +129,27 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -119.0
+offset_left = -122.0
 offset_right = -12.0
+offset_bottom = -30.0
 grow_horizontal = 0
 grow_vertical = 2
 text = "asdf"
+vertical_alignment = 1
+
+[node name="UserMedalScore" type="Label" parent="Profile"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -122.0
+offset_top = 30.0
+offset_right = -12.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.905882, 0.670588, 0.145098, 1)
+text = "19 033 P"
 vertical_alignment = 1
 
 [node name="ExampleScoreboard" parent="." instance=ExtResource("3_gp5e1")]
@@ -155,6 +165,9 @@ offset_top = 40.0
 offset_right = 1111.0
 offset_bottom = 405.0
 
+[node name="NewgroundsSessionWatcher" type="Node" parent="."]
+script = ExtResource("6_16v52")
+
 [connection signal="text_changed" from="ExampleSaveData/TextEdit" to="ExampleSaveData" method="_on_text_edit_text_changed"]
 [connection signal="pressed" from="Log In" to="." method="_on_log_in_pressed"]
 [connection signal="pressed" from="Check Session" to="." method="_on_check_session_pressed"]
@@ -166,3 +179,5 @@ offset_bottom = 405.0
 [connection signal="pressed" from="Get Slot Data" to="." method="_on_get_slot_data_pressed"]
 [connection signal="pressed" from="Clear Slot" to="." method="_on_clear_slot_pressed"]
 [connection signal="pressed" from="Profile" to="." method="_on_profile_pressed"]
+[connection signal="on_signed_in" from="NewgroundsSessionWatcher" to="." method="_on_newgrounds_session_watcher_on_signed_in"]
+[connection signal="on_signed_out" from="NewgroundsSessionWatcher" to="." method="_on_newgrounds_session_watcher_on_signed_out"]

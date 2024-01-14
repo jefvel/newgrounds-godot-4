@@ -9,18 +9,20 @@ func _ready():
 func test():
 	
 	pass
-@onready var newgrounds_image = $Profile/Avatar/NewgroundsImage
+
 @onready var user_name = $Profile/UserName
+@onready var user_medal_score = $Profile/UserMedalScore
 
 func sessionChange(s:NewgroundsSession):
 	if s.is_signed_in():
 		user_name.text = s.user.name
-		newgrounds_image.url = s.user.icons.large
 		log_in.text = "Log out";
+		var scr = await NG.medal_get_medal_score().on_response
+		user_medal_score.text = '%s' % scr.data
 	else:
 		user_name.text = "-"
-		newgrounds_image.url = ''
 		log_in.text = "Log in";
+		user_medal_score.text = '';
 
 func _on_log_in_pressed():
 	if NG.signed_in:
@@ -77,4 +79,14 @@ func _slot_loaded(data):
 
 func _on_clear_slot_pressed():
 	NG.cloudsave_clear_slot(1)
+	pass # Replace with function body.
+
+
+func _on_newgrounds_session_watcher_on_signed_in():
+	print("NewgroundsSessionWatcher: Signed in")
+	pass # Replace with function body.
+
+
+func _on_newgrounds_session_watcher_on_signed_out():
+	print("NewgroundsSessionWatcher: Signed out")
 	pass # Replace with function body.

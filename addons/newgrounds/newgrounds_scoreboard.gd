@@ -1,9 +1,6 @@
 @icon("res://addons/newgrounds/icons/scoreboard.png")
-
-extends Node
 ## A node for fetching and submitting scores to a Newgrounds scoreboard.
-## 
-class_name NewgroundsScoreboard
+class_name NewgroundsScoreboard extends Node
 
 enum ScoreboardPeriod {
 	Day,

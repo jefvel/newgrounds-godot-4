@@ -1,0 +1,64 @@
+[gd_scene load_steps=7 format=3 uid="uid://dgf2xfu4r0mtd"]
+
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_user_avatar.gd" id="1_3406q"]
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_image.gd" id="1_eonae"]
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="2_nc7fo"]
+[ext_resource type="Texture2D" uid="uid://dx4k5ptcvvurv" path="res://addons/newgrounds/icons/anon.png" id="3_bfbd5"]
+
+[sub_resource type="Animation" id="Animation_a7pgm"]
+resource_name = "image_loaded"
+step = 0.0333333
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("NewgroundsImage:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.0666667, 0.133333, 0.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1.1, 1.1), Vector2(0.98, 0.98), Vector2(0.98, 0.98), Vector2(1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_d4hdt"]
+_data = {
+"image_loaded": SubResource("Animation_a7pgm")
+}
+
+[node name="NewgroundsUserAvatar" type="Control"]
+layout_mode = 3
+anchor_right = 0.052
+anchor_bottom = 0.093
+offset_right = 0.0960007
+offset_bottom = -0.264
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_3406q")
+
+[node name="NewgroundsSessionWatcher" type="Node" parent="."]
+script = ExtResource("2_nc7fo")
+
+[node name="NewgroundsImage" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(28, 28)
+texture = ExtResource("3_bfbd5")
+expand_mode = 1
+script = ExtResource("1_eonae")
+placeholder = ExtResource("3_bfbd5")
+
+[node name="Animations" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_d4hdt")
+}
+
+[connection signal="on_signed_in" from="NewgroundsSessionWatcher" to="." method="_on_newgrounds_session_watcher_on_signed_in"]
+[connection signal="on_signed_out" from="NewgroundsSessionWatcher" to="." method="_on_newgrounds_session_watcher_on_signed_out"]
+[connection signal="on_image_loaded" from="NewgroundsImage" to="." method="_on_newgrounds_image_on_image_loaded"]
+[connection signal="on_image_start_loading" from="NewgroundsImage" to="." method="_on_newgrounds_image_on_image_start_loading"]

@@ -1,12 +1,13 @@
 extends TextureRect
 class_name NewgroundsImage
 
-@export  var placeholder = preload("res://addons/newgrounds/icons/anon.png")
+@export var placeholder: Texture2D = null
 
 @export var url: String: set = _set_url;
 
 static var cached_images := Dictionary()
 
+signal on_image_start_loading();
 signal on_image_loaded(image:ImageTexture);
 
 func _ready():
@@ -14,16 +15,21 @@ func _ready():
 
 var request: HTTPRequest;
 func _set_url(u):
+	if u == url:
+		return
+	
 	url = u;
 	if !url:
 		texture = placeholder;
 		return
+	
+	on_image_start_loading.emit();
+	
 	if request && is_instance_valid(request):
 		request.cancel_request()
 		request.queue_free()
 	
 	if !Engine.is_editor_hint() and cached_images.has(url):
-		print("used cached image")
 		texture = cached_images[url]
 		on_image_loaded.emit(texture);
 		return;

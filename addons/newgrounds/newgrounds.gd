@@ -12,7 +12,7 @@ var session_started: bool = false;
 var signing_in: bool = false;
 var signed_in : bool = false;
 
-## Emitted when starting session/signing in/checking session/signing out
+## Emitted when starting session/signing in/signing out
 signal on_session_change(session: NewgroundsSession)
 
 signal on_signed_in();
@@ -37,7 +37,6 @@ signal on_cloudsave_set_data(slot: int);
 signal on_cloudsave_get_data(slot: int);
 signal on_cloudsave_cleared(slot: int);
 
-signal on_scoreboards_loaded(scoreboards);
 signal on_highscore_submitted(board_id: int, score: NewgroundsScoreboardItem)
 
 var aes = AESContext.new();
@@ -73,6 +72,38 @@ func _init_medals():
 func init():
 	_refresh_session()
 
+## Starts a session & launches newgrounds passport in case user
+## has not logged in. If logged in, this will do nothing.
+func sign_in():
+	if (session.is_signed_in() && !session.expired):
+		return
+	if (!session.passport_url.is_empty()):
+		signing_in = true;
+		$Pinger.start()
+		OS.shell_open(session.passport_url)
+	else:
+		var req = _session_start()
+		await req.on_response
+		# retry signin
+		sign_in()
+	pass
+
+## Signs the user out from newgrounds.io and ends the current session
+func sign_out():
+	await components.app_end_session().on_response
+	
+	session.reset()
+	session.save()
+	signed_in = false;
+	session_started = false;
+	signing_in = false;
+	$Pinger.stop()
+	
+	on_session_change.emit(session)
+	on_signed_out.emit();
+	pass
+
+
 func _refresh_session() -> NewgroundsRequest:
 	var res = components.app_check_session()
 	res.on_response.connect(_session_change)
@@ -80,22 +111,17 @@ func _refresh_session() -> NewgroundsRequest:
 
 ## Session stuff
 #############
-func session_start(force: bool = false) -> NewgroundsRequest:
+func _session_start(force: bool = false) -> NewgroundsRequest:
 	var req = components.app_start_session()
 	req.on_response.connect(_session_change)
 	return req
 	#return request("App.startSession", { "force": force }, "session", _session_change)
 
-func session_check():
-	var res = await components.app_check_session().on_response
-	_session_change(res)
-	return res
-
 func _session_change(data:NewgroundsResponse):
 	if (data.error):
 		if !session_started:
 			$Pinger.stop()
-			session_start()
+			_session_start()
 		return
 	
 	var s = data.data;
@@ -119,24 +145,6 @@ func _session_change(data:NewgroundsResponse):
 
 ## Scoreboards
 ###############
-func scoreboards_get():
-	var req = components.scoreboard_get_boards()
-	var res = await req.on_response
-	if !res.error:
-		on_scoreboards_loaded.emit(res.data);
-	else:
-		print("Newgrounds.io - error : " + res.error_string)
-
-func scoreboard_list() -> NewgroundsRequest:
-	return request("ScoreBoard.getBoards", null, "scoreboards", _on_scoreboards_get)
-func _on_scoreboards_get(m):
-	if !m.success:
-		return
-	var d = m.result.data;
-	if !d.success:
-		return
-	on_scoreboards_loaded.emit(d.scoreboards)
-
 func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, period: String = "D", social: bool = false, user:String = "", tag: String = "") -> NewgroundsRequest:
 	var params = {
 		"id": scoreboard_id,
@@ -151,18 +159,13 @@ func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, per
 		params.tag = tag;
 	return request("ScoreBoard.getScores", params, "scores")
 
-func scoreboard_submit(scoreboard_id: int, score: int) -> NewgroundsRequest:
-	var req = request("ScoreBoard.postScore", {"id": scoreboard_id, "value": score}, "score")
-	req.on_success.connect(_on_highscore_submitted.bind(scoreboard_id))
-	return req;
-func _on_highscore_submitted(score, scoreboard_id):
-	on_highscore_submitted.emit(scoreboard_id, NewgroundsScoreboardItem.fromDict(score));
-	pass
-
-
-func scoreboard_submit_time(scoreboard_id: int, seconds: float) -> NewgroundsRequest:
-	return scoreboard_submit(scoreboard_id, int(seconds * 1000.0))
-
+func scoreboard_submit(scoreboard_id: int, score: int) -> NewgroundsScoreboardItem:
+	var req = await components.scoreboard_post_score(scoreboard_id, score).on_response
+	if req.error:
+		return null
+	return NewgroundsScoreboardItem.fromDict(req.data);
+func scoreboard_submit_time(scoreboard_id: int, seconds: float) -> NewgroundsScoreboardItem:
+	return await scoreboard_submit(scoreboard_id, int(seconds * 1000.0))
 
 ## Medals
 ############
@@ -187,15 +190,18 @@ func _on_medals_get(m):
 
 ## Unlocks medal. emits on_medal_unlocked on success
 func medal_unlock(medal_id: int) -> NewgroundsRequest:
-	var req = request("Medal.unlock", { "id": medal_id }, "medal")
-	req.on_success.connect(_on_medal_unlock);
-	req.on_error.connect(_on_medal_fail.bind(medal_id));
+	var req = components.medal_unlock(medal_id)
+	req.on_response.connect(_medal_unlock_response.bind(medal_id))
 	return req;
-func _on_medal_fail(error, medal_id):
-	session._failed_medal_unlocks.push_back(medal_id);
-	session.save()
-func _on_medal_unlock(m):
-	var medal = get_medal_resource(m.id);
+
+func _medal_unlock_response(res, medal_id):
+	if res.error:
+		session._failed_medal_unlocks.push_back(medal_id);
+		session.save()
+		return
+	
+	var m = res.data;
+	var medal = get_medal_resource(medal_id);
 	if medal:
 		medal.unlocked = true;
 	else:
@@ -205,47 +211,12 @@ func _on_medal_unlock(m):
 	pass
 
 ## Fetch the user's total score, emitted by on_medal_score_get
-func medal_get_medal_score() -> NewgroundsRequest:
-	var req = components.medal_get_medal_score()
-	req.on_response.connect(_on_medal_get_medal_score)
-	return req;
-func _on_medal_get_medal_score(data):
-	on_medal_score_get.emit(data.data);
+func medal_get_medal_score() -> int:
+	var req = await components.medal_get_medal_score().on_response
+	on_medal_score_get.emit(req.data)
+	return req.data;
 
-## Signs the user out from newgrounds.io and ends the current session
-func sign_out():
-	await components.app_end_session().on_response
-	
-	session.reset()
-	session.save()
-	signed_in = false;
-	session_started = false;
-	signing_in = false;
-	$Pinger.stop()
-	
-	on_session_change.emit(session)
-	on_signed_out.emit();
-	pass
-
-## Starts a session & launches newgrounds passport in case user
-## has not logged in. If logged in, this will do nothing.
-func sign_in():
-	if (session.is_signed_in() && !session.expired):
-		return
-	if (!session.passport_url.is_empty()):
-		signing_in = true;
-		$Pinger.start()
-		OS.shell_open(session.passport_url)
-	else:
-		var req = session_start()
-		await req.on_response
-		# retry signin
-		sign_in()
-	pass
-
-func _retry_signin(s):
-	sign_in();
-	
+## CLoudsave stuff
 func cloudsave_load_slots() -> NewgroundsRequest:
 	var req = request("CloudSave.loadSlots", null)
 	req.on_success.connect(_on_cloudsave_slots_loaded)
@@ -376,7 +347,7 @@ func _notification(what):
 	match what:
 		NOTIFICATION_WM_WINDOW_FOCUS_IN:
 			if signing_in:
-				session_check.call_deferred()
+				_refresh_session.call_deferred()
 			pass
 	
 

@@ -36,7 +36,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 script = ExtResource("1_3406q")
-animate_on_set = false
 
 [node name="NewgroundsSessionWatcher" type="Node" parent="."]
 script = ExtResource("2_1nl04")

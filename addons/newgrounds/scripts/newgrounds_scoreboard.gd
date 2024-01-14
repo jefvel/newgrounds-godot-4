@@ -72,18 +72,14 @@ func _signed_in():
 		refresh();
 	
 func submit_score(score: int):
-	var e:NewgroundsRequest = NG.scoreboard_submit(scoreboard_id, score)
-	e.on_error.connect(_on_error);
-	e.on_success.connect(_on_submitted);
-
-func _on_submitted(score):
-	on_score_submitted.emit(NewgroundsScoreboardItem.fromDict(score.score));
-	
-func _on_error(err):
-	print(err);
+	var res = await NG.scoreboard_submit(scoreboard_id, score)
+	if !res:
+		printerr('could not post score')
+		return
+	on_score_submitted.emit(res);
 
 func submit_time(time: float):
-	return submit_score(int(time * 1000.0));
+	return await submit_score(int(time * 1000.0));
 	
 func next_page():
 	if refreshing or reached_end:
@@ -116,7 +112,7 @@ func refresh():
 			scores = [];
 			refreshing = false;
 			return;
-	req = NG.scoreboard_get_scores(scoreboard_id, limit, skip, period, social, _usr, score_tag)
+	req = NG.components.scoreboard_get_scores(scoreboard_id, limit, skip, period, social, _usr, score_tag)
 	req.on_success.connect(_score_get);
 	req.on_error.connect(_get_failure)
 	pass

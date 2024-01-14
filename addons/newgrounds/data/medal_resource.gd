@@ -22,6 +22,20 @@ enum Difficulty {
 
 @export var difficulty: Difficulty;
 
+func get_medal_value() -> int:
+	match difficulty:
+		Difficulty.Easy:
+			return 5;
+		Difficulty.Moderate:
+			return 10;
+		Difficulty.Challenging:
+			return 25;
+		Difficulty.Difficult:
+			return 50;
+		Difficulty.Brutal:
+			return 100;
+	return 0;
+
 static func fromDict(d: Dictionary):
 	var m = MedalResource.new()
 	load_from_dict(m, d)

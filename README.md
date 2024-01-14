@@ -59,7 +59,7 @@ It also has a signal `on_unlock(medal)`, and the property `unlocked` to check if
 
 ## Requests
 
-The `NG` node contains various methods for calling the Newgrounds API, they all return a `NewgroundsRequest`:
+The `NG.components` node contains various methods for calling the Newgrounds API, if you want to do it manually.They all return a `NewgroundsRequest`:
 
 ```gdscript
 NG.ping()
@@ -88,12 +88,9 @@ You can listen to the request done by these calls:
 
 ```gdscript
 func get_scoreboards():
-	var req = NG.scoreboard_list();
-	req.on_success.connect(on_success)
-	req.on_error.connect(on_error)
-
-func on_success(scoreboards):
-	print(scoreboards)
-func on_error(error):
-	print(error)
+	var response = await NG.components.scoreboard_list().on_response
+	if response.error:
+		print_error(response.error_message)
+	else:
+		print(response.data);
 ```

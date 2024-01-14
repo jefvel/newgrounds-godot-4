@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://b2rnbblsa42pm" path="res://addons/newgrounds/examples/example_scoreboard.tscn" id="3_gp5e1"]
 [ext_resource type="PackedScene" uid="uid://dgf2xfu4r0mtd" path="res://addons/newgrounds/newgrounds_user_avatar.tscn" id="3_vopvl"]
 [ext_resource type="PackedScene" uid="uid://cafxm6acw5lcl" path="res://addons/newgrounds/examples/example_medal_list.tscn" id="4_lqp0p"]
-[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="6_16v52"]
+[ext_resource type="Script" path="res://addons/newgrounds/scripts/newgrounds_session_watcher.gd" id="6_bsg2s"]
 
 [node name="NewgroundsDebugExamples" type="Control"]
 layout_mode = 3
@@ -166,7 +166,7 @@ offset_right = 1111.0
 offset_bottom = 405.0
 
 [node name="NewgroundsSessionWatcher" type="Node" parent="."]
-script = ExtResource("6_16v52")
+script = ExtResource("6_bsg2s")
 
 [connection signal="text_changed" from="ExampleSaveData/TextEdit" to="ExampleSaveData" method="_on_text_edit_text_changed"]
 [connection signal="pressed" from="Log In" to="." method="_on_log_in_pressed"]

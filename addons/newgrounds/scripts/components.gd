@@ -1,5 +1,5 @@
+##  (Mostly for internal use) A node containing predefined API requests to Newgrounds.io
 extends Node
-class_name NewgroundsComponents
 
 var aes_key: String
 var app_id: String

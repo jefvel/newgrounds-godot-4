@@ -1,4 +1,4 @@
-class_name ScoreboardItem
+class_name NewgroundsScoreboardItem
 
 var index: int;
 
@@ -7,8 +7,8 @@ var formatted_value: String;
 var value: int;
 var tag: String;
 
-static func fromDict(d: Dictionary) -> ScoreboardItem:
-	var s = ScoreboardItem.new()
+static func fromDict(d: Dictionary) -> NewgroundsScoreboardItem:
+	var s = NewgroundsScoreboardItem.new()
 	
 	s.formatted_value = d.formatted_value;
 	s.value = d.value

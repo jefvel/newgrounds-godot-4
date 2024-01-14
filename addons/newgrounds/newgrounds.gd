@@ -4,7 +4,7 @@ var app_id:String;
 var aes_key:String;
 var auto_init: bool;
 
-@onready var components:NewgroundsComponents = $Components
+@onready var components = $Components
 
 var session: NewgroundsSession = NewgroundsSession.new();
 var session_started: bool = false;
@@ -38,11 +38,11 @@ signal on_cloudsave_get_data(slot: int);
 signal on_cloudsave_cleared(slot: int);
 
 signal on_scoreboards_loaded(scoreboards);
-signal on_highscore_submitted(board_id: int, score: ScoreboardItem)
+signal on_highscore_submitted(board_id: int, score: NewgroundsScoreboardItem)
 
 var aes = AESContext.new();
 
-const C = preload("res://addons/newgrounds/consts.gd")
+const C = preload("res://addons/newgrounds/newgrounds_consts.gd")
 func _ready():
 	_load_session();
 	_init_medals();
@@ -156,7 +156,7 @@ func scoreboard_submit(scoreboard_id: int, score: int) -> NewgroundsRequest:
 	req.on_success.connect(_on_highscore_submitted.bind(scoreboard_id))
 	return req;
 func _on_highscore_submitted(score, scoreboard_id):
-	on_highscore_submitted.emit(scoreboard_id, ScoreboardItem.fromDict(score));
+	on_highscore_submitted.emit(scoreboard_id, NewgroundsScoreboardItem.fromDict(score));
 	pass
 
 
@@ -306,23 +306,30 @@ func cloudsave_get_data(slot_id: int) -> NewgroundsRequest:
 	request.init(app_id, aes_key, session, aes)
 	add_child(request)
 	
-	var slot_request = cloudsave_load_slot(slot_id);
-	slot_request.on_success.connect(_on_cloudsave_data_get_loaded_slot.bind(request))
+	var slot_request = components.cloudsave_load_slot(slot_id);
+	slot_request.on_response.connect(_on_cloudsave_data_get_loaded_slot.bind(request))
 	
 	return request;
 	pass
 	
-func _on_cloudsave_data_get_loaded_slot(res, data_request: NewgroundsRequest):
-	var slot = _store_slot_data(res.slot);
-	if res.slot.url:
-		data_request.custom_request(res.slot.url)
-		data_request.on_success.connect(_on_cloudsave_get_data.bind(slot))
+func _on_cloudsave_data_get_loaded_slot(res:NewgroundsResponse, data_request: NewgroundsRequest):
+	var slot = _store_slot_data(res.data);
+	if !res.error and res.data.url:
+		data_request.custom_request(res.data.url)
+		var loadRes = await data_request.on_response # .connect(_on_cloudsave_get_data.bind(slot))
+		
+		if loadRes.error:
+			data_request.on_error.emit("Failed to load cloudsave")
+			return
+		
+		slot.data = loadRes.data
+		on_cloudsave_get_data.emit(slot.id)
 	else:
 		data_request.on_error.emit("CloudSave slot empty");
 	pass
 
 func _on_cloudsave_get_data(data, slot: NewgroundsSaveSlot):
-	slot.data = data;
+	slot.data = data.data;
 	on_cloudsave_get_data.emit(slot.id)
 	pass
 	

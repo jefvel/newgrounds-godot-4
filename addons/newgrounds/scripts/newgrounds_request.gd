@@ -1,7 +1,6 @@
-extends HTTPRequest
 ## A node for calling components in the newgrounds.io API.
 ## Should only be used in code.
-class_name NewgroundsRequest
+class_name NewgroundsRequest extends HTTPRequest
 
 const ERR_INVALID_SESSION = 104;
 
@@ -118,7 +117,9 @@ func _request_completed(result, response_code, headers, body):
 	
 	if _custom_call:
 		if response_code == 200:
+			resp.data = body_string
 			on_success.emit(body_string)
+			on_response.emit(resp)
 		else:
 			resp.error = FAILED
 			resp.error_message = body_string

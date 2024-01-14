@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://b2rnbblsa42pm"]
 
 [ext_resource type="Script" path="res://addons/newgrounds/examples/example_scoreboard.gd" id="1_nyg48"]
-[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_scoreboard.gd" id="1_xju32"]
+[ext_resource type="Script" path="res://addons/newgrounds/scripts/newgrounds_scoreboard.gd" id="1_xju32"]
 
 [node name="ExampleScoreboard" type="ColorRect"]
 offset_right = 266.0

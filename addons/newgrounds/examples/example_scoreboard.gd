@@ -14,8 +14,8 @@ func _ready():
 		period.add_item(e, NewgroundsScoreboard.ScoreboardPeriod.get(e))
 	data.scoreboard_period = period.get_item_id(period.selected)
 
-var score_list: Array[ScoreboardItem] = [];
-func scores_get(scores: Array[ScoreboardItem]):
+var score_list: Array[NewgroundsScoreboardItem] = [];
+func scores_get(scores: Array[NewgroundsScoreboardItem]):
 	item_list.clear()
 	score_list = scores;
 	for score in scores:

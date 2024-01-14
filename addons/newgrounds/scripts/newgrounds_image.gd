@@ -1,5 +1,4 @@
 extends TextureRect
-class_name NewgroundsImage
 
 @export var placeholder: Texture2D = null
 

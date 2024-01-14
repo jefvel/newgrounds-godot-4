@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://cx0lbddb6da4w"]
 
 [ext_resource type="Script" path="res://addons/newgrounds/newgrounds.gd" id="1_426xc"]
-[ext_resource type="Script" path="res://addons/newgrounds/components.gd" id="2_doc3a"]
+[ext_resource type="Script" path="res://addons/newgrounds/scripts/components.gd" id="2_doc3a"]
 
 [node name="Newgrounds" type="Node"]
 script = ExtResource("1_426xc")

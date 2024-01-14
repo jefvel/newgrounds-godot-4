@@ -12,8 +12,8 @@ enum ScoreboardPeriod {
 
 var refreshing: bool = false;
 
-signal on_scores_get(scores: Array[ScoreboardItem]);
-signal on_score_submitted(score: ScoreboardItem);
+signal on_scores_get(scores: Array[NewgroundsScoreboardItem]);
+signal on_score_submitted(score: NewgroundsScoreboardItem);
 
 @export var scoreboard_id: NewgroundsIds.ScoreboardId = NewgroundsIds.ScoreboardId.None;
 @export var scoreboard_period: ScoreboardPeriod = ScoreboardPeriod.All : 
@@ -54,7 +54,7 @@ var user: String;
 
 var reached_end: bool = false;
 
-var scores: Array[ScoreboardItem] = [];
+var scores: Array[NewgroundsScoreboardItem] = [];
 
 func _test_refresh():
 	if auto_fetch:
@@ -77,7 +77,7 @@ func submit_score(score: int):
 	e.on_success.connect(_on_submitted);
 
 func _on_submitted(score):
-	on_score_submitted.emit(ScoreboardItem.fromDict(score.score));
+	on_score_submitted.emit(NewgroundsScoreboardItem.fromDict(score.score));
 	
 func _on_error(err):
 	print(err);
@@ -141,7 +141,7 @@ func _score_get(new_scores):
 	
 	scores = [];
 	for score in new_scores:
-		var s = ScoreboardItem.fromDict(score);
+		var s = NewgroundsScoreboardItem.fromDict(score);
 		s.index = index;
 		scores.push_back(s)
 		index += 1

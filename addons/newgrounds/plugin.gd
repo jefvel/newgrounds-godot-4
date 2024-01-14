@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const C = preload("res://addons/newgrounds/consts.gd")
+const C = preload("res://addons/newgrounds/newgrounds_consts.gd")
 func _enter_tree():
 	add_project_setting(C.APP_ID_PROPERTY, "", TYPE_STRING)
 	add_project_setting(C.AES_KEY_PROPERTY, "", TYPE_STRING)
@@ -72,6 +72,8 @@ func scoreboards_get(b):
 	scoreboardList = b.scoreboards;
 	loadedScoreboards = true
 	_write_ids()
+	
+const NewgroundsImage = preload("res://addons/newgrounds/scripts/newgrounds_image.gd")
 
 func medals_get(medals):
 	var medal_dir = ProjectSettings.get_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY)

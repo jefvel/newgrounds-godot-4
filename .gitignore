@@ -15,7 +15,7 @@ data_*/
 mono_crash.*.json
 
 addons/newgrounds/imported_medals
-addons/newgrounds/newgrounds_ids.gd
+addons/newgrounds/data/newgrounds_ids.gd
 
 *.sav
 *.tmp

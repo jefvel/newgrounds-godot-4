@@ -285,14 +285,17 @@ func cloudsave_load_slots() -> Array[NewgroundsSaveSlot]:
 	
 	return res_array
 
-func _preload_saveslot_data():
-	
-	pass
-
 ## Saves slot data both remotely and locally.
 ## Returns saveslot if saved in cloud successfully, otherwise null.
 func cloudsave_set_data(slot_id: int, data: String) -> NewgroundsSaveSlot:
-	offline_data.store_local_slot_data(slot_id, data)
+	offline_data.store_local_slot_data(slot_id, data);
+	if offline_mode:
+		var slot = save_slots[slot_id]
+		if slot:
+			slot.data = data;
+		on_cloudsave_set_data.emit(slot_id)
+		return null
+
 	var res = await components.cloudsave_set_data(slot_id, data).on_response
 	
 	if !res.error:
@@ -333,7 +336,6 @@ func _store_slot_data(slot_data: Dictionary):
 		slot.setValuesFromDict(slot_data)
 	else:
 		slot = NewgroundsSaveSlot.fromDict(slot_data)
-	offline_data.set_saveslot_info(slot)
 	save_slots[slot.id] = slot
 	return slot;
 
@@ -358,7 +360,8 @@ func cloudsave_get_data(slot_id: int) -> String:
 			return ''
 		
 		slot.data = loadRes.data
-		offline_data.set_saveslot_info(slot)
+		
+		offline_data.store_local_slot_data(slot.id, slot.data, slot.timestamp)
 		on_cloudsave_get_data.emit(slot.id)
 		
 		return slot.data

@@ -75,7 +75,7 @@ func load_game(save_slot:int = 1):
 		for i in node_data.keys():
 			if i == "__node_path" or i == "__node_scene_path":
 				continue
-			print("set %s to %s" % [i, node_data[i]])
+			# print("set %s to %s" % [i, node_data[i]])
 			new_node.set(i, node_data[i])
 			if new_node.has_method("_cloud_set_property"):
 				new_node.call("_cloud_set_property", i, node_data[i])

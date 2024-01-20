@@ -50,8 +50,7 @@ func _get_slot_data(slot_id:int):
 	var data = {
 		"id": slot_id,
 		"timestamp": 0,
-		"local_timestamp": 0,
-		"data": ''
+		"data": '',
 	}
 	
 	_save_slots[str(slot_id)] = data
@@ -60,27 +59,20 @@ func _get_slot_data(slot_id:int):
 func clear_slot_data(slot_id: int):
 	var slot = _get_slot_data(slot_id)
 	slot.timestamp = 0;
-	slot.local_timestamp = 0;
 	slot.data = ''
 	save();
-
-func set_saveslot_info(saveslot: NewgroundsSaveSlot):
-	var data = _get_slot_data(saveslot.id);
-	data.timestamp = saveslot.timestamp;
-	save();
-	pass
 
 func store_local_slot_data(slot_id: int, data_string: String, timestamp = int(Time.get_unix_time_from_system())):
 	var data = _get_slot_data(slot_id);
 	data.data = data_string;
-	data.local_timestamp = timestamp
+	data.timestamp = timestamp
 	save();
 	pass
 	
 ## returns local saveslot data if remove save is older
 func get_local_slot_data(slot_id: int, remote_timestamp: int):
 	var data = _get_slot_data(slot_id)
-	if data.local_timestamp >= remote_timestamp:
+	if data.timestamp >= remote_timestamp:
 		return data.data;
 	return ''
 
@@ -110,6 +102,22 @@ func retry_sending_medals_and_highscores():
 		NG.scoreboard_submit(scr.id, scr.value)
 	
 	save();
+	
+	sync_save_slots()
+	
+func sync_save_slots():
+	var slots = await NG.cloudsave_load_slots();
+	for s in slots:
+		var local_slot = _get_slot_data(s.id)
+		if local_slot.timestamp > s.timestamp:
+			await NG.cloudsave_set_data(s.id, local_slot.data)
+			#print("uploaded slot #%s to newgrounds" % s.id)
+		elif s.timestamp > local_slot.timestamp:
+			await NG.cloudsave_get_data(s.id)
+			#print("downloaded slot #%s from newgrounds" % s.id)
+	
+	save()
+	pass
 
 func save():
 	var s = FileAccess.open(OFFLINE_FILE_NAME, FileAccess.WRITE);
@@ -146,6 +154,7 @@ func load():
 		var node_data = json.get_data()
 		for i in node_data.keys():
 			set(i, node_data[i])
+
 
 
 

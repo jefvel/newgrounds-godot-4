@@ -65,8 +65,10 @@ func _on_profile_pressed():
 
 
 func _on_load_saveslots_pressed():
-	var res = await NG.cloudsave_load_slots()
-	print(res)
+	var slots = await NG.cloudsave_load_slots()
+	for slot in slots:
+		print(slot.timestamp)
+		
 
 func _on_save_slot_pressed():
 	var save_slot = $"Save Slot"

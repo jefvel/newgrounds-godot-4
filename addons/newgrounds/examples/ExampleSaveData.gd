@@ -7,6 +7,7 @@ func _ready():
 	NGCloudSave.on_cloudsave_loaded.connect(_on_loaded)
 	
 func _on_loaded():
+	print("ExampleSaveData has been loaded.")
 	print(test_text)
 
 func _cloud_save():

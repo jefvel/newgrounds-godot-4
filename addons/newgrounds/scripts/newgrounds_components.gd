@@ -76,7 +76,7 @@ func cloudsave_set_data(slot_id: int, data: String) -> NewgroundsRequest:
 	return _request("CloudSave.setData", { "id": slot_id, "data": data }, "slot")
 
 func cloudsave_get_data(slot_data_url: String) -> NewgroundsRequest:
-	print('Newgrounds: Call CloudSave.getData')
+	#print('Newgrounds: Call CloudSave.getData')
 	
 	var request = NewgroundsRequest.new()
 	request.init(app_id, aes_key, session, aes)
@@ -85,7 +85,7 @@ func cloudsave_get_data(slot_data_url: String) -> NewgroundsRequest:
 	return request
 
 func _request(component, parameters, field_name: String = "") -> NewgroundsRequest:
-	print('Newgrounds: Call %s' % component)
+	#print('Newgrounds: Call %s' % component)
 	
 	var request = NewgroundsRequest.new()
 	request.init(app_id, aes_key, session, aes)

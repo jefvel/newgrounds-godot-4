@@ -49,9 +49,7 @@ func create(component, parameters, result_field = "", encrypt = true) -> HTTPReq
 	}
 	if parameters:
 		call_parameters.parameters = parameters;
-	
-	#print(component)
-	#print(parameters)
+
 	var call = null
 	if encrypt:
 		var iv = generate_iv()

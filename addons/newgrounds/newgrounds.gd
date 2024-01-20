@@ -19,6 +19,10 @@ var signed_in : bool = false;
 ## Emitted when starting session/signing in/signing out
 signal on_session_change(session: NewgroundsSession)
 
+## Emitted when savedata has been uploaded/downloaded, 
+## and offline scoreboards & medals have been synced
+signal on_saves_synced()
+
 signal on_signed_in();
 signal on_signed_out();
 
@@ -156,7 +160,7 @@ func _session_change(data:NewgroundsResponse):
 		$Pinger.start()
 		offline_mode = false;
 		on_signed_in.emit()
-		offline_data.retry_sending_medals_and_highscores()
+		_sync_offline_data()
 	else:
 		offline_mode = !session.is_signed_in();
 		
@@ -165,7 +169,10 @@ func _session_change(data:NewgroundsResponse):
 	if changed:
 		on_session_change.emit(session);
 	pass
-
+func _sync_offline_data():
+	await offline_data.retry_sending_medals_and_highscores()
+	on_saves_synced.emit();
+	
 ## Scoreboards
 ###############
 func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, period: String = "D", social: bool = false, user:String = "", tag: String = "") -> Array[NewgroundsScoreboardItem]:

@@ -4,8 +4,12 @@ extends Control
 
 func _ready():
 	NG.on_session_change.connect(sessionChange)
+	NG.on_saves_synced.connect(on_saves_synced)
 	sessionChange(NG.session)
-	
+
+func on_saves_synced():
+	print("Saves have been synced")
+
 func test():
 	
 	pass

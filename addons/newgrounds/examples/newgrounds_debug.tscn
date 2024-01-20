@@ -168,6 +168,7 @@ offset_left = 422.0
 offset_top = 57.0
 offset_right = 688.0
 offset_bottom = 422.0
+scoreboard_id = 13398
 
 [node name="ExampleMedalList" parent="." instance=ExtResource("4_lqp0p")]
 offset_left = 885.0

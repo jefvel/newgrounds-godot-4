@@ -98,7 +98,7 @@ func unhash_string(d: String):
 	return parsed;
 
 func retry_sending_medals_and_highscores():
-	var m = await NG.medal_get_list()
+	await NG.medal_get_list()
 	for medal_id in _medal_unlocks.keys():
 		var medal_status = _medal_unlocks[medal_id];
 		if medal_status == MedalUnlockState.UnlockedLocal:

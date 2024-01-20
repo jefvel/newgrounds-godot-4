@@ -3,6 +3,11 @@ extends Control
 @onready var text_edit = $TextEdit
 
 var test_text = ""
+func _ready():
+	NGCloudSave.on_cloudsave_loaded.connect(_on_loaded)
+	
+func _on_loaded():
+	print(test_text)
 
 func _cloud_save():
 	return {

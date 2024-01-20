@@ -12,6 +12,9 @@ static func fromDict(d: Dictionary):
 	var s = NewgroundsSaveSlot.new()
 	s.setValuesFromDict(d)
 	return s;
+	
+func is_empty():
+	return timestamp == 0 and !url
 
 func setValuesFromDict(d: Dictionary):
 	var s = self

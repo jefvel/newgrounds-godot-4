@@ -62,29 +62,28 @@ func _on_submit_score_pressed():
 func _on_profile_pressed():
 	if NG.session.user:
 		NG.session.user.open_profile_url();
-	pass # Replace with function body.
 
 
 func _on_load_saveslots_pressed():
 	var res = await NG.cloudsave_load_slots()
 	print(res)
-	pass # Replace with function body.
-
 
 func _on_save_slot_pressed():
-	#NG.cloudsave_set_data(1, "TEST DATA HE HE %s" % randi())
-	NGCloudSave.save_game()
-	pass # Replace with function body.
-
+	var save_slot = $"Save Slot"
+	var orig_text = save_slot.text
+	save_slot.text = "Saving..."
+	await NGCloudSave.save_game()
+	save_slot.text = orig_text
 
 func _on_get_slot_data_pressed():
-	NGCloudSave.load_game()
-	#NG.cloudsave_get_data(1).on_success.connect(_slot_loaded)
-	pass # Replace with function body.
+	var btn = $"Get Slot Data"
+	var orig_text = btn.text
+	btn.text = "Loading..."	
+	await NGCloudSave.load_game()
+	btn.text = orig_text
 
 func _slot_loaded(data):
 	print("Loaded data slot with data %s" % data)
-
 
 func _on_clear_slot_pressed():
 	await NG.cloudsave_clear_slot(1)

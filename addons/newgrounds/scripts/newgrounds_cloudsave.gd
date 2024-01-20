@@ -1,16 +1,19 @@
 extends Node
 
-signal on_cloudsave_saved();
-signal on_cloudsave_loaded();
+## Called once the save process is complete
+signal on_cloudsave_saved;
+## Called at the start of loading a save, could be useful to reset the state of objects
+signal on_cloudsave_load_start;
+## Called once all properties have been loaded
+signal on_cloudsave_loaded;
 
 func save_game(save_slot: int = 1):
-	#var save_game = FileAccess.open("user://savegame.save", FileAccess.WRITE)
 	var save_string = "";
 	var save_nodes = get_tree().get_nodes_in_group("CloudSave")
 	for node in save_nodes:
 		# Check the node has a save function.
 		if !node.has_method("_cloud_save"):
-			print("persistent node '%s' is missing a save() function, skipped" % node.name)
+			print("Newgrounds.io - NGCloudSave: Node '%s' is missing a _cloud_save() function, skipped" % node.name)
 			continue
 
 		# Call the node's save function.
@@ -30,10 +33,12 @@ func save_game(save_slot: int = 1):
 	on_cloudsave_saved.emit()
 
 func load_game(save_slot:int = 1):
+	on_cloudsave_load_start.emit()
 	var text_data = await NG.cloudsave_get_data(save_slot)
 	if text_data == "":
 		on_cloudsave_loaded.emit();
 		return
+	
 	var rows = NG.offline_data.unhash_string(text_data).split("\n", false)
 	for row in rows:
 		var json_string = Marshalls.base64_to_utf8(row)

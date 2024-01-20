@@ -98,7 +98,6 @@ func create(component, parameters, result_field = "", encrypt = true) -> HTTPReq
 		"input=" + JSON.stringify(input_parameters).uri_encode()
 	)
 	
-	print(reqErr)
 	pending = true;
 	
 	return self

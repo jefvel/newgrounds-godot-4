@@ -89,7 +89,7 @@ func medals_get(medals):
 		else:
 			medal = MedalResource.fromDict(m)
 			medal.resource_path = resource_name;
-			
+		
 		medalList.push_back(medal)
 		ResourceSaver.save(medal)
 		

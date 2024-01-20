@@ -156,7 +156,6 @@ func _session_change(data:NewgroundsResponse):
 		$Pinger.start()
 		offline_mode = false;
 		on_signed_in.emit()
-		medal_get_list();
 		offline_data.retry_sending_medals_and_highscores()
 	else:
 		offline_mode = !session.is_signed_in();
@@ -169,8 +168,18 @@ func _session_change(data:NewgroundsResponse):
 
 ## Scoreboards
 ###############
-func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, period: String = "D", social: bool = false, user:String = "", tag: String = "") -> NewgroundsRequest:
-	return components.scoreboard_get_scores(scoreboard_id, limit, skip, period, social, user, tag)
+func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, period: String = "D", social: bool = false, user:String = "", tag: String = "") -> Array[NewgroundsScoreboardItem]:
+	var res = components.scoreboard_get_scores(scoreboard_id, limit, skip, period, social, user, tag).on_response
+	if res.error:
+		return []
+	var score_list: Array[NewgroundsScoreboardItem] = [];
+	var i = skip + 1
+	for score in res.data:
+		var item = NewgroundsScoreboardItem.fromDict(score)
+		item.index = i
+		i += 1
+		score_list.push_back(item)
+	return score_list;
 
 func scoreboard_submit(scoreboard_id: int, score: int) -> NewgroundsScoreboardItem:
 	var req = await components.scoreboard_post_score(scoreboard_id, score).on_response
@@ -302,7 +311,7 @@ func cloudsave_clear_slot(slot_id: int) -> bool:
 	offline_data.clear_slot_data(slot_id)
 	var res = await components.cloudsave_clear_slot(slot_id).on_response
 	if !res.error:
-		var slot = _store_slot_data(res.slot)
+		var slot = _store_slot_data(res.data)
 		slot.data = "";
 		on_cloudsave_cleared.emit(slot_id);
 		return true
@@ -310,9 +319,9 @@ func cloudsave_clear_slot(slot_id: int) -> bool:
 	pass
 
 func cloudsave_load_slot(slot_id: int) -> NewgroundsSaveSlot:
-	var req = await components.cloudsave_load_slot(slot_id).on_response
-	if !req.error:
-		var slot = _store_slot_data(req.data)
+	var res = await components.cloudsave_load_slot(slot_id).on_response
+	if !res.error:
+		var slot = _store_slot_data(res.data)
 		on_cloudsave_slot_loaded.emit(slot.id)
 		return slot
 	return null

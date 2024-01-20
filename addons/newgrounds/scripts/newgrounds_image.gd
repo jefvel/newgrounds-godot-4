@@ -7,7 +7,8 @@ extends TextureRect
 static var cached_images := Dictionary()
 
 signal on_image_start_loading();
-signal on_image_loaded(image:ImageTexture);
+signal on_image_loaded(image:Image);
+
 
 func _ready():
 	texture = placeholder;
@@ -30,7 +31,7 @@ func _set_url(u):
 	
 	if !Engine.is_editor_hint() and cached_images.has(url):
 		texture = cached_images[url]
-		on_image_loaded.emit(texture);
+		on_image_loaded.emit(texture.get_image());
 		return;
 	
 	request = HTTPRequest.new()

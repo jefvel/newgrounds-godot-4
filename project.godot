@@ -23,11 +23,6 @@ NGCloudSave="*res://addons/newgrounds/scripts/newgrounds_cloudsave.gd"
 
 enabled=PackedStringArray("res://addons/newgrounds/plugin.cfg")
 
-[newgrounds.io]
-
-app_id="57502:0fmmlG1c"
-AES-128_key="7T7twb5BeO624AyGVxdK4g=="
-
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

@@ -11,7 +11,7 @@ signal on_unlock(medal:MedalResource);
 func unlock():
 	if unlocked:
 		return
-	var req = NG.medal_unlock(medal_id)
+	NG.medal_unlock(medal_id)
 	pass
 
 func _ready():
@@ -29,9 +29,8 @@ func _medals_loaded(m: Array[MedalResource]):
 			#NG.on_medals_loaded.disconnect(_medals_loaded)
 	pass
 
-func _on_medal_unlocked(m:MedalResource):
-	if m.id == medal_id:
-		on_unlock.emit(m)
+func _on_medal_unlocked(id:int):
+	if id == medal_id:
+		on_unlock.emit(NG.get_medal_resource(id))
 		unlocked = true;
-		# NG.on_medal_unlocked.disconnect(_on_medal_unlocked)
 	

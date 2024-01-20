@@ -63,6 +63,7 @@ func _test_refresh():
 
 func _ready():
 	NG.on_signed_in.connect(_signed_in)
+	NG.on_highscore_submitted.connect(_on_score_submitted)
 	if auto_fetch:
 		refresh()
 	pass
@@ -70,7 +71,11 @@ func _ready():
 func _signed_in():
 	if auto_fetch and own_scores:
 		refresh();
-	
+
+func _on_score_submitted(_scoreboard_id: int, score):
+	if auto_fetch and scoreboard_id == _scoreboard_id:
+		refresh()
+
 func submit_score(score: int):
 	var res = await NG.scoreboard_submit(scoreboard_id, score)
 	if !res:
@@ -80,7 +85,7 @@ func submit_score(score: int):
 
 func submit_time(time: float):
 	return await submit_score(int(time * 1000.0));
-	
+
 func next_page():
 	if refreshing or reached_end:
 		return

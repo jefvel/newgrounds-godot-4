@@ -40,5 +40,4 @@ grow_vertical = 2
 allow_reselect = true
 fixed_icon_size = Vector2i(50, 50)
 
-[connection signal="item_clicked" from="Container/Content/ItemList" to="." method="_on_item_list_item_clicked"]
 [connection signal="item_selected" from="Container/Content/ItemList" to="." method="_on_item_list_item_clicked"]

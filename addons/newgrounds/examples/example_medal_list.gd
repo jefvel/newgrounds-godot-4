@@ -11,7 +11,7 @@ func _ready():
 	NG.on_medals_loaded.connect(_refresh_list)
 	pass # Replace with function body.
 
-func _on_medal_unlocked(m):
+func _on_medal_unlocked(medal_id:int):
 	_refresh_list(NG.medals.values())
 
 func _refresh_list(medals):

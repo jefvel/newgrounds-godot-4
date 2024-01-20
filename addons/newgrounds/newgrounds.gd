@@ -5,6 +5,10 @@ var aes_key:String;
 var auto_init: bool;
 
 @onready var components = $Components
+@onready var offline_data = $OfflineData
+
+## will be true if user is not signed in or without internet
+var offline_mode: bool = true;
 
 var session: NewgroundsSession = NewgroundsSession.new();
 var session_started: bool = false;
@@ -26,7 +30,7 @@ func get_medal_resource(medal_id: int) -> MedalResource:
 
 var medal_score: int = 0; ## Stores the user's total medal score, fetched with medal_get_medal_score()
 signal on_medals_loaded(medals:Array[MedalResource]);
-signal on_medal_unlocked(medal:MedalResource);
+signal on_medal_unlocked(medal_id:int);
 signal on_medal_score_get(score:int);
 
 var save_slots:Dictionary = {};
@@ -41,7 +45,7 @@ signal on_highscore_submitted(board_id: int, score: NewgroundsScoreboardItem)
 
 var aes = AESContext.new();
 
-const C = preload("res://addons/newgrounds/newgrounds_consts.gd")
+const C = preload("res://addons/newgrounds/scripts/newgrounds_consts.gd")
 func _ready():
 	_load_session();
 	_init_medals();
@@ -66,15 +70,25 @@ func _init_medals():
 	var medalMap = NewgroundsIds.MedalIdsToResource.medals;
 	for medal_id in medalMap.keys():
 		var medal_resource:MedalResource = load(medalMap[medal_id])
+		medal_resource.unlocked = offline_data.is_medal_unlocked(medal_id)
 		medals[medal_id] = medal_resource;
 	pass
 
+func _p(s):
+	# print('Newgrounds.io: %s' % s)
+	pass
+
 func init():
+	_p("init")
 	_refresh_session()
 
+var _retrying_signin = false
 ## Starts a session & launches newgrounds passport in case user
 ## has not logged in. If logged in, this will do nothing.
 func sign_in():
+	var s = await components.app_check_session().on_response
+	if s.error:# == NewgroundsRequest.ERR_SESSION_CANCELLED or s.error == NewgroundsRequest.ERR_INVALID_SESSION:
+		session.reset()
 	if (session.is_signed_in() && !session.expired):
 		return
 	if (!session.passport_url.is_empty()):
@@ -83,9 +97,10 @@ func sign_in():
 		OS.shell_open(session.passport_url)
 	else:
 		var req = _session_start()
-		await req.on_response
-		# retry signin
-		sign_in()
+		var res = await req.on_response
+		if res.error != NewgroundsRequest.ERR_FAILED_REQUEST:
+			# retry signin
+			sign_in()
 	pass
 
 ## Signs the user out from newgrounds.io and ends the current session
@@ -94,6 +109,7 @@ func sign_out():
 	
 	session.reset()
 	session.save()
+	offline_mode = true;
 	signed_in = false;
 	session_started = false;
 	signing_in = false;
@@ -105,6 +121,7 @@ func sign_out():
 
 
 func _refresh_session() -> NewgroundsRequest:
+	_p("refresh_session")
 	var res = components.app_check_session()
 	res.on_response.connect(_session_change)
 	return res
@@ -112,18 +129,22 @@ func _refresh_session() -> NewgroundsRequest:
 ## Session stuff
 #############
 func _session_start(force: bool = false) -> NewgroundsRequest:
+	_p('Session start')
 	var req = components.app_start_session()
 	req.on_response.connect(_session_change)
 	return req
-	#return request("App.startSession", { "force": force }, "session", _session_change)
 
 func _session_change(data:NewgroundsResponse):
 	if (data.error):
+		if data.error == NewgroundsRequest.ERR_FAILED_REQUEST:
+			offline_mode = true;
+			_p("Offline mode: true")
+			return;
 		if !session_started:
 			$Pinger.stop()
 			_session_start()
 		return
-	
+		
 	var s = data.data;
 	var changed = session.setFromDictionary(s)
 	
@@ -133,9 +154,12 @@ func _session_change(data:NewgroundsResponse):
 		signed_in = true;
 		signing_in = false;
 		$Pinger.start()
+		offline_mode = false;
 		on_signed_in.emit()
 		medal_get_list();
-		session._retry_sending_medals_and_highscores()
+		offline_data.retry_sending_medals_and_highscores()
+	else:
+		offline_mode = !session.is_signed_in();
 		
 	_save_session()
 	
@@ -146,24 +170,17 @@ func _session_change(data:NewgroundsResponse):
 ## Scoreboards
 ###############
 func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, period: String = "D", social: bool = false, user:String = "", tag: String = "") -> NewgroundsRequest:
-	var params = {
-		"id": scoreboard_id,
-		"limit": limit,
-		"skip": skip,
-		"period": period,
-		"social": social,
-	}
-	if user:
-		params.user = user;
-	if tag:
-		params.tag = tag;
-	return request("ScoreBoard.getScores", params, "scores")
+	return components.scoreboard_get_scores(scoreboard_id, limit, skip, period, social, user, tag)
 
 func scoreboard_submit(scoreboard_id: int, score: int) -> NewgroundsScoreboardItem:
 	var req = await components.scoreboard_post_score(scoreboard_id, score).on_response
 	if req.error:
+		if req.error != NewgroundsRequest.ERR_INVALID_SCOREBOARD_ID:
+			offline_data.add_failed_scoreboard_post(scoreboard_id, score)
 		return null
-	return NewgroundsScoreboardItem.fromDict(req.data);
+	var scr = NewgroundsScoreboardItem.fromDict(req.data)
+	on_highscore_submitted.emit(scoreboard_id, scr)
+	return scr;
 func scoreboard_submit_time(scoreboard_id: int, seconds: float) -> NewgroundsScoreboardItem:
 	return await scoreboard_submit(scoreboard_id, int(seconds * 1000.0))
 
@@ -171,12 +188,14 @@ func scoreboard_submit_time(scoreboard_id: int, seconds: float) -> NewgroundsSco
 ############
 
 ## Lists medals, emits on_medals_loaded
-func medal_get_list() -> NewgroundsRequest:
-	var req = request("Medal.getList", null, "medals")
-	req.on_success.connect(_on_medals_get)
-	return req;
-func _on_medals_get(m):
+func medal_get_list() -> Array[MedalResource]:
+	var res = await components.medal_get_list().on_response
+	
+	if res.error:
+		return medals.values()
+	
 	var medals_list:Array[MedalResource] = [];
+	var m = res.data;
 	for medal in m:
 		var medal_res = get_medal_resource(medal.id)
 		if !medal_res:
@@ -184,21 +203,45 @@ func _on_medals_get(m):
 			medals[medal_res.id] = medal_res;
 		else:
 			medal_res.unlocked = medal.unlocked
+		
+		if !medal_res.unlocked:
+			var medal_status = offline_data.get_medal_unlock_state(medal_res.id);
+			# Medal was unlocked on newgrounds, but was then reset
+			if session.is_signed_in() and medal_status == offline_data.MedalUnlockState.UnlockedNewgrounds:
+				offline_data.set_medal_unlocked(medal_res.id, false)
+			else:
+				medal_res.unlocked = offline_data.is_medal_unlocked(medal_res.id);
+		else:
+			offline_data.set_medal_unlocked(medal_res.id, true)
 		medals_list.push_back(medal_res)
 		
 	on_medals_loaded.emit(medals_list)
+	return medals_list
 
 ## Unlocks medal. emits on_medal_unlocked on success
-func medal_unlock(medal_id: int) -> NewgroundsRequest:
-	var req = components.medal_unlock(medal_id)
-	req.on_response.connect(_medal_unlock_response.bind(medal_id))
-	return req;
-
-func _medal_unlock_response(res, medal_id):
+func medal_unlock(medal_id: int, silent: bool = false) -> bool:
+	if offline_mode:
+		var medal = get_medal_resource(medal_id);
+		if medal:
+			medal.unlocked = true;
+		offline_data.add_failed_medal_unlock(medal_id)
+		if !silent:
+			on_medal_unlocked.emit(medal_id)
+		return true
+	
+	var res = await components.medal_unlock(medal_id).on_response
+	
 	if res.error:
-		session._failed_medal_unlocks.push_back(medal_id);
-		session.save()
-		return
+		if res.error != NewgroundsRequest.ERR_MEDAL_NOT_FOUND:
+			var medal = get_medal_resource(medal_id);
+			if medal:
+				medal.unlocked = true;
+			offline_data.add_failed_medal_unlock(medal_id)
+			if !silent:
+				on_medal_unlocked.emit(medal_id)
+		return false
+	
+	offline_data.set_medal_unlocked(medal_id, true)
 	
 	var m = res.data;
 	var medal = get_medal_resource(medal_id);
@@ -207,8 +250,9 @@ func _medal_unlock_response(res, medal_id):
 	else:
 		medal = MedalResource.fromDict(m);
 		medals[medal.id] = medal;
-	on_medal_unlocked.emit(medal)
-	pass
+	if !silent:
+		on_medal_unlocked.emit(medal_id)
+	return true
 
 ## Fetch the user's total score, emitted by on_medal_score_get
 func medal_get_medal_score() -> int:
@@ -217,50 +261,61 @@ func medal_get_medal_score() -> int:
 	return req.data;
 
 ## CLoudsave stuff
-func cloudsave_load_slots() -> NewgroundsRequest:
-	var req = request("CloudSave.loadSlots", null)
-	req.on_success.connect(_on_cloudsave_slots_loaded)
-	return req
-
-func _on_cloudsave_slots_loaded(res):
-	for s in res.slots:
+func cloudsave_load_slots() -> Array[NewgroundsSaveSlot]:
+	var res = await components.cloudsave_load_slots().on_response
+	if res.error:
+		return []
+	
+	var slots = res.data
+	var res_array:Array[NewgroundsSaveSlot] = [];
+	for s in slots:
 		var slot: NewgroundsSaveSlot = _store_slot_data(s)
+		res_array.push_back(slot)
 	
 	on_cloudsave_slots_loaded.emit()
-
-func cloudsave_set_data(slot_id: int, data: String) -> NewgroundsRequest:
-	var req = request("CloudSave.setData", { "id": slot_id, "data": data })
-	req.on_success.connect(_on_cloudsave_set_data.bind(data))
-	return req;
-	pass
-
-func _on_cloudsave_set_data(res, data):
-	var slot: NewgroundsSaveSlot = _store_slot_data(res.slot)
-	slot.data = data;
-	on_cloudsave_set_data.emit(slot.id)
-	pass
 	
-func cloudsave_clear_slot(slot_id: int) -> NewgroundsRequest:
-	var req = request("CloudSave.clearSlot", { "id": slot_id })
-	req.on_success.connect(_on_cloudsave_clear_slot)
-	return req;
-	pass
-func _on_cloudsave_clear_slot(data):
-	var slot = _store_slot_data(data.slot)
-	slot.data = "";
-	on_cloudsave_cleared.emit(slot.id);
+	return res_array
+
+func _preload_saveslot_data():
+	
 	pass
 
-func cloudsave_load_slot(slot_id: int) -> NewgroundsRequest:
-	var req = request("CloudSave.loadSlot", { "id": slot_id })
-	req.on_success.connect(_on_cloudsave_slot_loaded)
-	return req
+## Saves slot data both remotely and locally.
+## Returns saveslot if saved in cloud successfully, otherwise null.
+func cloudsave_set_data(slot_id: int, data: String) -> NewgroundsSaveSlot:
+	offline_data.store_local_slot_data(slot_id, data)
+	var res = await components.cloudsave_set_data(slot_id, data).on_response
+	
+	if !res.error:
+		var slot: NewgroundsSaveSlot = _store_slot_data(res.data)
+		slot.data = data;
+		offline_data.store_local_slot_data(slot_id, data, slot.timestamp)
+		on_cloudsave_set_data.emit(slot_id)
+		return slot
+	
+	return null
 	pass
 
-func _on_cloudsave_slot_loaded(res):
-	var slot = _store_slot_data(res.slot)
-	on_cloudsave_slot_loaded.emit(slot.id)
+## Clears saveslot both remotely and in the local cache
+## Returns true on success, otherwise false.
+func cloudsave_clear_slot(slot_id: int) -> bool:
+	offline_data.clear_slot_data(slot_id)
+	var res = await components.cloudsave_clear_slot(slot_id).on_response
+	if !res.error:
+		var slot = _store_slot_data(res.slot)
+		slot.data = "";
+		on_cloudsave_cleared.emit(slot_id);
+		return true
+	return false
 	pass
+
+func cloudsave_load_slot(slot_id: int) -> NewgroundsSaveSlot:
+	var req = await components.cloudsave_load_slot(slot_id).on_response
+	if !req.error:
+		var slot = _store_slot_data(req.data)
+		on_cloudsave_slot_loaded.emit(slot.id)
+		return slot
+	return null
 
 func _store_slot_data(slot_data: Dictionary):
 	var slot: NewgroundsSaveSlot
@@ -269,62 +324,38 @@ func _store_slot_data(slot_data: Dictionary):
 		slot.setValuesFromDict(slot_data)
 	else:
 		slot = NewgroundsSaveSlot.fromDict(slot_data)
+	offline_data.set_saveslot_info(slot)
 	save_slots[slot.id] = slot
 	return slot;
 
-func cloudsave_get_data(slot_id: int) -> NewgroundsRequest:
-	var request = NewgroundsRequest.new()
-	request.init(app_id, aes_key, session, aes)
-	add_child(request)
+## Returns the data string from a cloudsave. Attempts to fallback to offline cache.
+## Returns empty string on error or empty save.
+func cloudsave_get_data(slot_id: int) -> String:
+	if offline_mode:
+		return offline_data.get_local_slot_data(slot_id, 0)
 	
-	var slot_request = components.cloudsave_load_slot(slot_id);
-	slot_request.on_response.connect(_on_cloudsave_data_get_loaded_slot.bind(request))
+	var slot = await cloudsave_load_slot(slot_id);
+	var slot_remote_timestamp = 0 if slot == null else slot.timestamp
 	
-	return request;
-	pass
-	
-func _on_cloudsave_data_get_loaded_slot(res:NewgroundsResponse, data_request: NewgroundsRequest):
-	var slot = _store_slot_data(res.data);
-	if !res.error and res.data.url:
-		data_request.custom_request(res.data.url)
-		var loadRes = await data_request.on_response # .connect(_on_cloudsave_get_data.bind(slot))
+	var local_save = offline_data.get_local_slot_data(slot_id, slot_remote_timestamp)
+	if local_save:
+		return local_save;
+
+	if slot:
+		var request = components.cloudsave_get_data(slot.url)
+		var loadRes = await request.on_response
 		
 		if loadRes.error:
-			data_request.on_error.emit("Failed to load cloudsave")
-			return
+			return ''
 		
 		slot.data = loadRes.data
+		offline_data.set_saveslot_info(slot)
 		on_cloudsave_get_data.emit(slot.id)
-	else:
-		data_request.on_error.emit("CloudSave slot empty");
-	pass
-
-func _on_cloudsave_get_data(data, slot: NewgroundsSaveSlot):
-	slot.data = data.data;
-	on_cloudsave_get_data.emit(slot.id)
-	pass
+		
+		return slot.data
 	
-
-func request(component, parameters, field_name: String = "", callable = null) -> NewgroundsRequest:
-	print(component)
+	return ''
 	
-	var request = NewgroundsRequest.new()
-	request.init(app_id, aes_key, session, aes)
-	add_child(request)
-	
-	if callable:
-		request.request_completed.connect(_request_completed.bind(callable))
-	
-	request.create(component, parameters, field_name)
-	return request
-
-func _request_completed(result, response_code, headers, body, callable: Callable):
-	var json = JSON.parse_string(body.get_string_from_utf8())
-	#print(json)
-	if callable:
-		callable.call(json)
-	pass
-
 func _load_session():
 	var _session_id = "";
 	
@@ -335,6 +366,7 @@ func _load_session():
 		""", true))
 
 	session.load();
+	offline_data.load();
 	
 	if _session_id:
 		session.id = _session_id;

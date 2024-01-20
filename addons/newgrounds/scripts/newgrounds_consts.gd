@@ -14,5 +14,5 @@ const MEDAL_HINT_TEXT_PROPERTY 			= "newgrounds.io/medal_hint_string";
 
 const IMPORT_ACTION_NAME 		= "Import Newgrounds Medals & Scoreboards"
 const NEWGROUNDS_IDS_TEMPLATE	= "res://addons/newgrounds/data/newgrounds_ids_template.txt"
-const IDS_FILE_PATH 			= "res://addons/newgrounds/newgrounds_ids.gd"
+const IDS_FILE_PATH 			= "res://addons/newgrounds/data/newgrounds_ids.gd"
 const MEDALS_PATH 				= "res://addons/newgrounds/imported_medals"

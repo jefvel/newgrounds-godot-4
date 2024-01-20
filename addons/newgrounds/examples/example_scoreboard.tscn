@@ -1,14 +1,13 @@
 [gd_scene load_steps=3 format=3 uid="uid://b2rnbblsa42pm"]
 
 [ext_resource type="Script" path="res://addons/newgrounds/examples/example_scoreboard.gd" id="1_nyg48"]
-[ext_resource type="Script" path="res://addons/newgrounds/scripts/newgrounds_scoreboard.gd" id="1_xju32"]
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_scoreboard.gd" id="1_xju32"]
 
 [node name="ExampleScoreboard" type="ColorRect"]
 offset_right = 266.0
-offset_bottom = 365.0
+offset_bottom = 395.0
 color = Color(0.603922, 0.411765, 0.192157, 1)
 script = ExtResource("1_xju32")
-scoreboard_id = 13398
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 1
@@ -16,13 +15,13 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 15.0
-offset_top = 17.0
+offset_top = 48.0
 offset_right = -15.0
 offset_bottom = -17.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Scoreboard" type="Control" parent="Control" node_paths=PackedStringArray("data")]
+[node name="Scoreboard Code" type="Control" parent="Control" node_paths=PackedStringArray("data")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -32,14 +31,14 @@ grow_vertical = 2
 script = ExtResource("1_nyg48")
 data = NodePath("../..")
 
-[node name="Control2" type="Control" parent="Control/Scoreboard"]
+[node name="Control2" type="Control" parent="Control/Scoreboard Code"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 31.0
 grow_horizontal = 2
 
-[node name="Period" type="OptionButton" parent="Control/Scoreboard/Control2"]
+[node name="Period" type="OptionButton" parent="Control/Scoreboard Code/Control2"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -48,7 +47,7 @@ offset_right = -127.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Refresh" type="Button" parent="Control/Scoreboard/Control2"]
+[node name="Refresh" type="Button" parent="Control/Scoreboard Code/Control2"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -58,7 +57,7 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Refresh"
 
-[node name="ItemList" type="ItemList" parent="Control/Scoreboard"]
+[node name="ItemList" type="ItemList" parent="Control/Scoreboard Code"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -69,7 +68,7 @@ grow_horizontal = 2
 grow_vertical = 2
 allow_reselect = true
 
-[node name="LoadingIndicator" type="ColorRect" parent="Control/Scoreboard/ItemList"]
+[node name="LoadingIndicator" type="ColorRect" parent="Control/Scoreboard Code/ItemList"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -79,7 +78,7 @@ grow_vertical = 2
 color = Color(0.223529, 0.223529, 0.223529, 0.231373)
 metadata/_edit_group_ = true
 
-[node name="LoadingText" type="Label" parent="Control/Scoreboard/ItemList/LoadingIndicator"]
+[node name="LoadingText" type="Label" parent="Control/Scoreboard Code/ItemList/LoadingIndicator"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -90,7 +89,7 @@ text = "Loading"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Control" type="Control" parent="Control/Scoreboard"]
+[node name="Control" type="Control" parent="Control/Scoreboard Code"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -100,7 +99,7 @@ offset_top = -43.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Previous Page" type="Button" parent="Control/Scoreboard/Control"]
+[node name="Previous Page" type="Button" parent="Control/Scoreboard Code/Control"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -110,7 +109,7 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Previous Page"
 
-[node name="Next Page" type="Button" parent="Control/Scoreboard/Control"]
+[node name="Next Page" type="Button" parent="Control/Scoreboard Code/Control"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -120,8 +119,19 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Next Page"
 
-[connection signal="item_selected" from="Control/Scoreboard/Control2/Period" to="Control/Scoreboard" method="_on_period_item_selected"]
-[connection signal="pressed" from="Control/Scoreboard/Control2/Refresh" to="Control/Scoreboard" method="_on_refresh_pressed"]
-[connection signal="item_selected" from="Control/Scoreboard/ItemList" to="Control/Scoreboard" method="_on_item_list_item_clicked"]
-[connection signal="pressed" from="Control/Scoreboard/Control/Previous Page" to="Control/Scoreboard" method="_on_previous_page_pressed"]
-[connection signal="pressed" from="Control/Scoreboard/Control/Next Page" to="Control/Scoreboard" method="_on_next_page_pressed"]
+[node name="Scoreboard Name" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.122
+offset_left = 15.0
+offset_top = 13.0
+offset_right = -15.0
+offset_bottom = -12.19
+text = "Scoreboard Name"
+
+[connection signal="item_selected" from="Control/Scoreboard Code/Control2/Period" to="Control/Scoreboard Code" method="_on_period_item_selected"]
+[connection signal="pressed" from="Control/Scoreboard Code/Control2/Refresh" to="Control/Scoreboard Code" method="_on_refresh_pressed"]
+[connection signal="item_selected" from="Control/Scoreboard Code/ItemList" to="Control/Scoreboard Code" method="_on_item_list_item_clicked"]
+[connection signal="pressed" from="Control/Scoreboard Code/Control/Previous Page" to="Control/Scoreboard Code" method="_on_previous_page_pressed"]
+[connection signal="pressed" from="Control/Scoreboard Code/Control/Next Page" to="Control/Scoreboard Code" method="_on_next_page_pressed"]

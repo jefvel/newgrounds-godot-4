@@ -22,19 +22,19 @@ func save_game(save_slot: int = 1):
 		var json_string = JSON.stringify(node_data)
 
 		save_string += Marshalls.utf8_to_base64(json_string) + "\n"
-	
-	var req = NG.cloudsave_set_data(save_slot, save_string)
-	req.on_success.connect(_on_cloudsave_saved)
 
-func _on_cloudsave_saved(data):
+	save_string = NG.offline_data.hash_string(save_string);
+	
+	var req = await NG.cloudsave_set_data(save_slot, save_string)
+	
 	on_cloudsave_saved.emit()
 
 func load_game(save_slot:int = 1):
-	NG.cloudsave_get_data(save_slot).on_success.connect(_load_game_string_loaded)
-	pass
-	
-func _load_game_string_loaded(text_data: String):
-	var rows = text_data.split("\n", false)
+	var text_data = await NG.cloudsave_get_data(save_slot)
+	if text_data == "":
+		on_cloudsave_loaded.emit();
+		return
+	var rows = NG.offline_data.unhash_string(text_data).split("\n", false)
 	for row in rows:
 		var json_string = Marshalls.base64_to_utf8(row)
 
@@ -65,7 +65,6 @@ func _load_game_string_loaded(text_data: String):
 			var initial_vals = newdd._cloud_save();
 			for i in initial_vals.keys():
 				new_node.set(i, initial_vals[i])
-
 		
 		# Now we set the remaining variables.
 		for i in node_data.keys():

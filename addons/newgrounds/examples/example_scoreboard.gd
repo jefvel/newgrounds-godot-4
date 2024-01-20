@@ -5,11 +5,19 @@ extends Control
 @onready var item_list:ItemList = $ItemList
 @onready var period:OptionButton = $Control2/Period
 @onready var loading_indicator = $ItemList/LoadingIndicator
+@onready var scoreboard_name = $"../../Scoreboard Name"
 
 func _ready():
 	loading_indicator.visible = false;
 	data.on_scores_get.connect(scores_get)
-
+	var name = NewgroundsIds.ScoreboardId.find_key(data.scoreboard_id)
+	if data.scoreboard_id != 0 and name:
+		scoreboard_name.text = name;
+	else:
+		if !data.scoreboard_id:
+			scoreboard_name.text = "No scoreboard set"
+		else:
+			scoreboard_name.text = "Unknown scoreboard"
 	for e in NewgroundsScoreboard.ScoreboardPeriod.keys():
 		period.add_item(e, NewgroundsScoreboard.ScoreboardPeriod.get(e))
 	data.scoreboard_period = period.get_item_id(period.selected)

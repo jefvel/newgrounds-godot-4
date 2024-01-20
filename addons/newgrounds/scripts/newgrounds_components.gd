@@ -75,21 +75,21 @@ func cloudsave_clear_slot(slot_id: int) -> NewgroundsRequest:
 func cloudsave_set_data(slot_id: int, data: String) -> NewgroundsRequest:
 	return _request("CloudSave.setData", { "id": slot_id, "data": data }, "slot")
 
+func cloudsave_get_data(slot_data_url: String) -> NewgroundsRequest:
+	print('Newgrounds: Call CloudSave.getData')
+	
+	var request = NewgroundsRequest.new()
+	request.init(app_id, aes_key, session, aes)
+	add_child(request)
+	request.custom_request(slot_data_url)
+	return request
 
-func _request(component, parameters, field_name: String = "", callable = null) -> NewgroundsRequest:
-	print(component)
+func _request(component, parameters, field_name: String = "") -> NewgroundsRequest:
+	print('Newgrounds: Call %s' % component)
 	
 	var request = NewgroundsRequest.new()
 	request.init(app_id, aes_key, session, aes)
 	add_child(request)
 	
-	if callable:
-		request.request_completed.connect(_request_completed.bind(callable))
-	
 	request.create(component, parameters, field_name)
 	return request
-
-func _request_completed(result, response_code, headers, body, callable: Callable):
-	var json = JSON.parse_string(body.get_string_from_utf8())
-	callable.call(json)
-	pass

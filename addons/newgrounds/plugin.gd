@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-const C = preload("res://addons/newgrounds/newgrounds_consts.gd")
+const C = preload("res://addons/newgrounds/scripts/newgrounds_consts.gd")
 func _enter_tree():
 	add_project_setting(C.APP_ID_PROPERTY, "", TYPE_STRING)
 	add_project_setting(C.AES_KEY_PROPERTY, "", TYPE_STRING)

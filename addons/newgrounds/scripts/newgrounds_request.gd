@@ -2,9 +2,18 @@
 ## Should only be used in code.
 class_name NewgroundsRequest extends HTTPRequest
 
-const ERR_INVALID_SESSION = 104;
-
 const gateway_uri:String = "https://newgrounds.io/gateway_v3.php"
+
+# Errors
+const ERR_FAILED_REQUEST = 999;
+
+const ERR_SESSION_ID_MISSING = 102;
+const ERR_INVALID_SCOREBOARD_ID = 203;
+const ERR_INVALID_SESSION = 104;
+const ERR_USER_NOT_LOGGED_IN = 110;
+const ERR_SESSION_CANCELLED = 111;
+
+const ERR_MEDAL_NOT_FOUND = 202;
 
 signal on_success(data);
 signal on_error(error);
@@ -82,13 +91,14 @@ func create(component, parameters, result_field = "", encrypt = true) -> HTTPReq
 	if (session.id):
 		input_parameters.session_id = session.id
 
-	request(
+	var reqErr = request(
 		gateway_uri,
 		["Content-Type: application/x-www-form-urlencoded"],
 		HTTPClient.METHOD_POST,
 		"input=" + JSON.stringify(input_parameters).uri_encode()
 	)
 	
+	print(reqErr)
 	pending = true;
 	
 	return self
@@ -109,9 +119,20 @@ func custom_request(url: String):
 
 func _request_completed(result, response_code, headers, body):
 	queue_free()
-	pending = false;
+
 	
+	pending = false;
 	var resp = NewgroundsResponse.new()
+	
+		
+	if result != RESULT_SUCCESS:
+		resp.error = ERR_FAILED_REQUEST
+		resp.error_message = "Could not fulfill request."
+		resp.data = null;
+		on_response.emit(resp);
+		on_error.emit(resp.error_message);
+		return
+		pass
 	
 	var body_string = body.get_string_from_utf8()
 	
@@ -128,6 +149,7 @@ func _request_completed(result, response_code, headers, body):
 		return
 	
 	var res = JSON.parse_string(body_string)
+	# res null, response_code 405 not allowed when under maintenance
 	if !res.success:
 		on_error.emit(res.error)
 		

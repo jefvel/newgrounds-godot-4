@@ -3,14 +3,12 @@ class_name NewgroundsSession
 const SESSION_FILE_NAME = 'user://ng_session_data'
 
 var id: String = "";
+var user_id: int = 0;
 var expired: bool = false;
 var passport_url: String = "";
 var remember: bool = true;
 
 var user: NewgroundsUser = null;
-
-var _failed_medal_unlocks:Array[int] = [];
-var _failed_highscore_posts:Array = [];
 
 func reset():
 	id = ""
@@ -18,8 +16,6 @@ func reset():
 	passport_url = ""
 	remember = true
 	user = null
-	_failed_highscore_posts = []
-	_failed_medal_unlocks = []
 
 func is_signed_in():
 	return user != null;
@@ -43,6 +39,7 @@ func setFromDictionary(d:Dictionary):
 	var has_user = d.user != null
 	if has_user:
 		var u = d.user;
+		user_id = u.id
 		user = NewgroundsUser.fromDict(u);
 	if has_user != had_user:
 		dirty = true
@@ -53,10 +50,13 @@ func save():
 	var s = FileAccess.open(SESSION_FILE_NAME, FileAccess.WRITE);
 	var data = {
 		"id": id,
-		"_failed_medal_unlocks": _failed_medal_unlocks,
-		"_failed_highscore_posts": _failed_highscore_posts,
+		"user_id": user_id,
 	}
-	var d = Marshalls.utf8_to_base64(JSON.stringify(data))
+	
+	var jsondata = JSON.stringify(data)
+
+	var d = NG.offline_data.hash_string(jsondata)
+	
 	s.store_line(d)
 	s.close()
 	
@@ -65,7 +65,7 @@ func load():
 		return
 	var save_game = FileAccess.open(SESSION_FILE_NAME, FileAccess.READ);
 	while save_game.get_position() < save_game.get_length():
-		var json_string = Marshalls.base64_to_utf8(save_game.get_line())
+		var json_string = NG.offline_data.unhash_string(save_game.get_line())
 
 		# Creates the helper class to interact with JSON
 		var json = JSON.new()
@@ -75,21 +75,11 @@ func load():
 		if not parse_result == OK:
 			print("JSON Parse Error: ", json.get_error_message(), " in ", json_string, " at line ", json.get_error_line())
 			continue
-
+		
 		# Get the data from the JSON object
 		var node_data = json.get_data()
-
 		for i in node_data.keys():
 			set(i, node_data[i])
 
 
-func _retry_sending_medals_and_highscores():
-	var meds = _failed_medal_unlocks;
-	_failed_medal_unlocks = [];
-	for medal_id in meds:
-		NG.medal_unlock(medal_id)
-	
-	var scrs = _failed_highscore_posts
-	_failed_highscore_posts = [];
-	for scr in scrs:
-		NG.scoreboard_submit(scr.id, scr.value)
+

@@ -1,5 +1,5 @@
 @icon("res://addons/newgrounds/icons/session.png")
-## A node used for tracking the logged in status of a Newgrounds user.
+## A node used for tracking the logged in status of a Newgrounds user. 
 class_name NewgroundsSessionWatcher extends Node
 
 var signed_in: bool;

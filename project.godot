@@ -16,8 +16,8 @@ config/features=PackedStringArray("4.2", "GL Compatibility")
 
 [autoload]
 
-NG="*res://addons/newgrounds/newgrounds.tscn"
-NGCloudSave="*res://addons/newgrounds/newgrounds_cloudsave.gd"
+NG="*res://addons/newgrounds/scripts/newgrounds.tscn"
+NGCloudSave="*res://addons/newgrounds/scripts/newgrounds_cloudsave.gd"
 
 [editor_plugins]
 

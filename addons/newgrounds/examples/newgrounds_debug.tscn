@@ -1,11 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://xcwcga3on6gp"]
+[gd_scene load_steps=8 format=3 uid="uid://xcwcga3on6gp"]
 
 [ext_resource type="Script" path="res://addons/newgrounds/examples/newgrounds_debug.gd" id="1_e2xbo"]
 [ext_resource type="Script" path="res://addons/newgrounds/examples/ExampleSaveData.gd" id="2_5kj3a"]
 [ext_resource type="PackedScene" uid="uid://b2rnbblsa42pm" path="res://addons/newgrounds/examples/example_scoreboard.tscn" id="3_gp5e1"]
 [ext_resource type="PackedScene" uid="uid://dgf2xfu4r0mtd" path="res://addons/newgrounds/newgrounds_user_avatar.tscn" id="3_vopvl"]
 [ext_resource type="PackedScene" uid="uid://cafxm6acw5lcl" path="res://addons/newgrounds/examples/example_medal_list.tscn" id="4_lqp0p"]
-[ext_resource type="Script" path="res://addons/newgrounds/scripts/newgrounds_session_watcher.gd" id="6_bsg2s"]
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="6_i37bs"]
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_medal_unlocker.gd" id="7_tu0rn"]
 
 [node name="NewgroundsDebugExamples" type="Control"]
 layout_mode = 3
@@ -27,9 +28,10 @@ script = ExtResource("2_5kj3a")
 [node name="TextEdit" type="TextEdit" parent="ExampleSaveData"]
 layout_mode = 0
 offset_left = -4.0
-offset_top = -26.0
+offset_top = -7.0
 offset_right = 269.0
-offset_bottom = 153.0
+offset_bottom = 172.0
+placeholder_text = "Example save data"
 
 [node name="Log In" type="Button" parent="."]
 layout_mode = 1
@@ -55,6 +57,14 @@ offset_right = 170.0
 offset_bottom = 134.0
 text = "List Medals"
 
+[node name="List Medals2" type="Button" parent="."]
+layout_mode = 1
+offset_left = 178.0
+offset_top = 103.0
+offset_right = 318.0
+offset_bottom = 134.0
+text = "Unlock Medal"
+
 [node name="List Scoreboards" type="Button" parent="."]
 layout_mode = 1
 offset_left = 30.0
@@ -74,35 +84,35 @@ text = "Post Score"
 [node name="Load Saveslots" type="Button" parent="."]
 layout_mode = 1
 offset_left = 30.0
-offset_top = 221.0
+offset_top = 282.0
 offset_right = 170.0
-offset_bottom = 252.0
+offset_bottom = 313.0
 text = "Load Saveslots"
 
 [node name="Save Slot" type="Button" parent="."]
 layout_mode = 1
 offset_left = 30.0
-offset_top = 260.0
+offset_top = 361.0
 offset_right = 170.0
-offset_bottom = 291.0
-text = "Set Slot Data"
+offset_bottom = 392.0
+text = "Save Slot 1 Data"
 
 [node name="Get Slot Data" type="Button" parent="."]
 layout_mode = 1
 offset_left = 30.0
-offset_top = 300.0
+offset_top = 321.0
 offset_right = 170.0
-offset_bottom = 331.0
-text = "Get Slot Data
+offset_bottom = 352.0
+text = "Load Slot 1 Data
 "
 
 [node name="Clear Slot" type="Button" parent="."]
 layout_mode = 1
 offset_left = 30.0
-offset_top = 340.0
+offset_top = 401.0
 offset_right = 170.0
-offset_bottom = 371.0
-text = "Clear slot data"
+offset_bottom = 432.0
+text = "Clear Slot 1 Data"
 
 [node name="Profile" type="Button" parent="."]
 layout_mode = 0
@@ -166,12 +176,16 @@ offset_right = 1111.0
 offset_bottom = 405.0
 
 [node name="NewgroundsSessionWatcher" type="Node" parent="."]
-script = ExtResource("6_bsg2s")
+script = ExtResource("6_i37bs")
+
+[node name="NewgroundsMedalUnlocker" type="Node" parent="."]
+script = ExtResource("7_tu0rn")
 
 [connection signal="text_changed" from="ExampleSaveData/TextEdit" to="ExampleSaveData" method="_on_text_edit_text_changed"]
 [connection signal="pressed" from="Log In" to="." method="_on_log_in_pressed"]
 [connection signal="pressed" from="Check Session" to="." method="_on_check_session_pressed"]
 [connection signal="pressed" from="List Medals" to="." method="_on_check_session_2_pressed"]
+[connection signal="pressed" from="List Medals2" to="." method="_on_list_medals_2_pressed"]
 [connection signal="pressed" from="List Scoreboards" to="." method="_on_list_scoreboards_pressed"]
 [connection signal="pressed" from="Submit Score" to="." method="_on_submit_score_pressed"]
 [connection signal="pressed" from="Load Saveslots" to="." method="_on_load_saveslots_pressed"]

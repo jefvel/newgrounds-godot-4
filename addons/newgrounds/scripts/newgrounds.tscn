@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://cx0lbddb6da4w"]
+
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds.gd" id="1_ktbj2"]
+[ext_resource type="Script" path="res://addons/newgrounds/scripts/newgrounds_components.gd" id="2_kgbri"]
+[ext_resource type="Script" path="res://addons/newgrounds/scripts/newgrounds_offline_data.gd" id="3_28bnn"]
+
+[node name="Newgrounds" type="Node"]
+script = ExtResource("1_ktbj2")
+
+[node name="Components" type="Node" parent="."]
+script = ExtResource("2_kgbri")
+
+[node name="OfflineData" type="Node" parent="."]
+script = ExtResource("3_28bnn")
+
+[node name="Pinger" type="Timer" parent="."]
+wait_time = 60.0
+
+[connection signal="timeout" from="Pinger" to="." method="_refresh_session"]

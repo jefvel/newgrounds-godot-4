@@ -35,12 +35,14 @@ func _on_log_in_pressed():
 	pass # Replace with function body.
 
 func _on_check_session_pressed():
+	var session = await NG.components.app_check_session().on_success
+	print(session)
 	pass # Replace with function body.
 
 
 func _on_check_session_2_pressed():
-	var r = await NG.medal_get_list().on_response
-	print(r.data)
+	var r = await NG.medal_get_list()
+	print(r)
 	refresh_medal_score()
 	pass # Replace with function body.
 
@@ -53,6 +55,7 @@ func _on_list_scoreboards_pressed():
 
 func _on_submit_score_pressed():
 	$ExampleScoreboard.submit_time(100 + randf() * 40)
+	#NG.scoreboard_submit(1230, 123)
 	pass # Replace with function body.
 
 
@@ -63,13 +66,14 @@ func _on_profile_pressed():
 
 
 func _on_load_saveslots_pressed():
-	NG.cloudsave_load_slots()
+	var res = await NG.cloudsave_load_slots()
+	print(res)
 	pass # Replace with function body.
 
 
 func _on_save_slot_pressed():
 	#NG.cloudsave_set_data(1, "TEST DATA HE HE %s" % randi())
-	NGCloudSave.save_game(1)
+	NGCloudSave.save_game()
 	pass # Replace with function body.
 
 
@@ -83,7 +87,8 @@ func _slot_loaded(data):
 
 
 func _on_clear_slot_pressed():
-	NG.cloudsave_clear_slot(1)
+	await NG.cloudsave_clear_slot(1)
+	get_tree().reload_current_scene()
 	pass # Replace with function body.
 
 
@@ -94,4 +99,10 @@ func _on_newgrounds_session_watcher_on_signed_in():
 
 func _on_newgrounds_session_watcher_on_signed_out():
 	print("NewgroundsSessionWatcher: Signed out")
+	pass # Replace with function body.
+
+
+func _on_list_medals_2_pressed():
+	var r = await NG.medal_unlock(939)
+	print(r)
 	pass # Replace with function body.

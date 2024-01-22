@@ -1,9 +1,9 @@
 ## Consts for configuring various things
 const NEWGROUNDS_AUTOLOAD_NAME = "NG"
-const NEWGROUNDS_AUTOLOAD_NODE = "res://addons/newgrounds/newgrounds.tscn"
+const NEWGROUNDS_AUTOLOAD_NODE = "res://addons/newgrounds/scripts/newgrounds.tscn"
 
 const CLOUDSAVE_AUTOLOAD_NAME = "NGCloudSave"
-const CLOUDSAVE_AUTOLOAD_NODE = "res://addons/newgrounds/newgrounds_cloudsave.gd"
+const CLOUDSAVE_AUTOLOAD_NODE = "res://addons/newgrounds/scripts/newgrounds_cloudsave.gd"
 
 const AUTO_INIT_PROPERTY 				= "newgrounds.io/auto_init";
 const APP_ID_PROPERTY					= "newgrounds.io/app_id"

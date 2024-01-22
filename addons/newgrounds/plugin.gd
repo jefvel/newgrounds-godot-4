@@ -9,7 +9,7 @@ func _enter_tree():
 	add_project_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY, C.MEDALS_PATH, TYPE_STRING, PROPERTY_HINT_DIR, "", false)
 	
 	add_tool_menu_item(C.IMPORT_ACTION_NAME, _import_newgrounds)
-	
+
 	if !FileAccess.file_exists(C.IDS_FILE_PATH):
 		_write_template_file([], [])
 	
@@ -79,19 +79,33 @@ func medals_get(medals):
 	var medal_dir = ProjectSettings.get_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY)
 	if !FileAccess.file_exists(medal_dir):
 		DirAccess.make_dir_absolute(medal_dir)
+	
 	var used_names = {}
+	const medal_names = preload("res://addons/newgrounds/data/newgrounds_ids.gd").MedalIdsToResource.medals
 	for m in medals.medals:
-		var resource_name = "%s/%s.tres" % [medal_dir, m.id]
+		var medal_name = m.name.to_snake_case();
+		if (used_names.has(medal_name)):
+			used_names[medal_name] = used_names[medal_name] + 1
+			medal_name += "_%s" % used_names[medal_name]
+		else:
+			used_names[medal_name] = 1
+		
+		var old_resource_name = medal_names.get(int(m.id))
+		var resource_name = "%s/%s.tres" % [medal_dir, medal_name]
 		var medal:MedalResource;
-		if ResourceLoader.exists(resource_name):
-			medal = ResourceLoader.load(resource_name)
+		if old_resource_name and ResourceLoader.exists(old_resource_name):
+			medal = ResourceLoader.load(old_resource_name)
 			MedalResource.load_from_dict(medal, m)
+			if old_resource_name != resource_name:
+				medal.take_over_path(resource_name)
+				DirAccess.remove_absolute(old_resource_name)
+				pass
 		else:
 			medal = MedalResource.fromDict(m)
-			medal.resource_path = resource_name;
+			medal.take_over_path(resource_name)
 		
+		ResourceSaver.save(medal, resource_name, ResourceSaver.SaverFlags.FLAG_CHANGE_PATH)
 		medalList.push_back(medal)
-		ResourceSaver.save(medal)
 		
 		var imgReq = NewgroundsImage.new()
 		imgReq.visible = false;
@@ -100,7 +114,6 @@ func medals_get(medals):
 		imgReq.on_image_loaded.connect(_set_medal_icon.bind(medal, resource_name, imgReq))
 		
 	loadedMedals = true
-	#print("Newgrounds.io - Medals imported")
 	_write_ids()
 	pass
 
@@ -125,7 +138,7 @@ func _write_ids():
 		return
 	_write_template_file(scoreboardList, medalList)
 	print("Newgrounds.io - Wrote Medal and Scoreboard IDs, reload the project to update")
-	
+	get_editor_interface().get_resource_filesystem().scan()
 	pass
 
 func _write_template_file(scoreboardList, medalList):
@@ -139,13 +152,20 @@ func _write_template_file(scoreboardList, medalList):
 			boardName = '_%s' % boardName
 		
 		boardString += "	%s = %s,\n" % [boardName, b.id]
+		
+	var used_names = {}
 	for m in medalList:
 		medalResource += '		%s: "%s",\n' % [m.id, m.resource_path]
-		var medalName: String = m.name;
-		medalName = _clean_name(medalName)
-		if _starts_with_nonletter(medalName):
-			medalName = '_%s' % medalName
-		medalString += "	%s = %s,\n" % [medalName, m.id]
+		var medal_name: String = m.name;
+		medal_name = _clean_name(medal_name)
+		if _starts_with_nonletter(medal_name):
+			medal_name = '_%s' % medal_name
+		if (used_names.has(medal_name)):
+			used_names[medal_name] = used_names[medal_name] + 1
+			medal_name += "_%s" % used_names[medal_name]
+		else:
+			used_names[medal_name] = 1
+		medalString += "	%s = %s,\n" % [medal_name, m.id]
 	
 	var f = FileAccess.get_file_as_string(C.NEWGROUNDS_IDS_TEMPLATE)
 	var s = f % [boardString, medalString, medalResource]

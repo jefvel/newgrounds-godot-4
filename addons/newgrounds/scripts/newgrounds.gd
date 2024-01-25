@@ -204,11 +204,16 @@ func scoreboard_submit_time(scoreboard_id: int, seconds: float) -> NewgroundsSco
 ############
 
 ## Lists medals, emits on_medals_loaded
-func medal_get_list() -> Array[MedalResource]:
-	var res = await components.medal_get_list().on_response
+func medal_get_list(app_id: String = "") -> Array[MedalResource]:
+	var is_external = app_id != "" and app_id != self.app_id;
+	
+	var res = await components.medal_get_list(app_id).on_response
 	
 	if res.error:
-		return medals.values()
+		if !is_external:
+			return medals.values()
+		print("Could not get external medals. Make sure the app ID is correct and allowed in your project settings.")
+		return []
 	
 	var medals_list:Array[MedalResource] = [];
 	var m = res.data;
@@ -216,10 +221,16 @@ func medal_get_list() -> Array[MedalResource]:
 		var medal_res = get_medal_resource(medal.id)
 		if !medal_res:
 			medal_res = MedalResource.fromDict(medal);
-			medals[medal_res.id] = medal_res;
 		else:
 			medal_res.unlocked = medal.unlocked
 		
+		medals_list.push_back(medal_res)
+		
+		if is_external:
+			continue
+		
+		if !is_external:
+			medals[medal_res.id] = medal_res;
 		if !medal_res.unlocked:
 			var medal_status = offline_data.get_medal_unlock_state(medal_res.id);
 			# Medal was unlocked on newgrounds, but was then reset
@@ -229,9 +240,11 @@ func medal_get_list() -> Array[MedalResource]:
 				medal_res.unlocked = offline_data.is_medal_unlocked(medal_res.id);
 		else:
 			offline_data.set_medal_unlocked(medal_res.id, true)
-		medals_list.push_back(medal_res)
 		
-	on_medals_loaded.emit(medals_list)
+	
+	if !is_external:
+		on_medals_loaded.emit(medals_list)
+	
 	return medals_list
 
 ## Unlocks medal. emits on_medal_unlocked on success

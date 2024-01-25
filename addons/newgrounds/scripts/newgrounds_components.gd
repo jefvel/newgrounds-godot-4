@@ -33,7 +33,7 @@ func app_check_session() -> NewgroundsRequest:
 func scoreboard_get_boards() -> NewgroundsRequest:
 	return _request("ScoreBoard.getBoards", null, "scoreboards")
 
-func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, period: String = "D", social: bool = false, user:String = "", tag: String = "") -> NewgroundsRequest:
+func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, period: String = "D", social: bool = false, user:String = "", tag: String = "", app_id: String = "") -> NewgroundsRequest:
 	var params = {
 		"id": scoreboard_id,
 		"limit": limit,
@@ -41,6 +41,8 @@ func scoreboard_get_scores(scoreboard_id: int, limit:int = 10, skip:int = 0, per
 		"period": period,
 		"social": social,
 	}
+	if app_id:
+		params.app_id = app_id;
 	if user:
 		params.user = user;
 	if tag:
@@ -52,8 +54,11 @@ func scoreboard_post_score(scoreboard_id: int, score: int) -> NewgroundsRequest:
 
 ## Medals
 ############
-func medal_get_list() -> NewgroundsRequest:
-	return _request("Medal.getList", null, "medals")
+func medal_get_list(app_id: String = "") -> NewgroundsRequest:
+	var data = null
+	if app_id != "":
+		data = { "app_id": app_id }
+	return _request("Medal.getList", data, "medals")
 
 func medal_unlock(medal_id: int) -> NewgroundsRequest:
 	return _request("Medal.unlock", { "id": medal_id }, "medal")
@@ -63,11 +68,17 @@ func medal_get_medal_score() -> NewgroundsRequest:
 
 ## CloudSave
 ##############
-func cloudsave_load_slots() -> NewgroundsRequest:
-	return _request("CloudSave.loadSlots", null, "slots")
+func cloudsave_load_slots(app_id: String = "") -> NewgroundsRequest:
+	var data = null
+	if app_id != "":
+		data = { "app_id": app_id }
+	return _request("CloudSave.loadSlots", data, "slots")
 
-func cloudsave_load_slot(slot_id: int) -> NewgroundsRequest:
-	return _request("CloudSave.loadSlot", { "id": slot_id }, "slot")
+func cloudsave_load_slot(slot_id: int, app_id: String = "") -> NewgroundsRequest:
+	var data = { "id": slot_id }
+	if app_id != "":
+		data.app_id = app_id
+	return _request("CloudSave.loadSlot", data, "slot")
 
 func cloudsave_clear_slot(slot_id: int) -> NewgroundsRequest:
 	return _request("CloudSave.clearSlot", { "id": slot_id }, "slot")
@@ -77,7 +88,7 @@ func cloudsave_set_data(slot_id: int, data: String) -> NewgroundsRequest:
 
 func cloudsave_get_data(slot_data_url: String) -> NewgroundsRequest:
 	#print('Newgrounds: Call CloudSave.getData')
-	
+
 	var request = NewgroundsRequest.new()
 	request.init(app_id, aes_key, session, aes)
 	add_child(request)

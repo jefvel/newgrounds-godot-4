@@ -159,7 +159,7 @@ func _request_completed(result, response_code, headers, body):
 	if !d.success:
 		on_error.emit(d.error)
 		
-		resp.error = d.error.code
+		resp.error = d.error.code if d.error.code != 0 else ERR_FAILED_REQUEST
 		resp.error_message = d.error.message
 		on_response.emit(resp)
 		return

@@ -140,19 +140,24 @@ NG.components.session_check()
 NG.components.session_end()
 
 NG.components.scoreboard_list();
-NG.components.scoreboard_get_scores(id, limit, skip, period, social, user, tag)
+# optional app_id to get other games' scores
+NG.components.scoreboard_get_scores(id, limit, skip, period, social, user = "", tag = "", app_id = "")
+
 NG.components.scoreboard_submit(id, value)
 NG.components.scoreboard_submit_time(id, seconds)
 
-NG.components.medal_get_list()
+# optional app_id can be provided to get other games' medals
+NG.components.medal_get_list(app_id = "")
 NG.components.medal_unlock(id)
 NG.components.medal_get_medal_score()
 
-NG.components.cloudsave_load_slots()
-NG.components.cloudsave_load_slot(slot_id)
-NG.components.cloudsave_clear_slot(slot_id)
-NG.components.cloudsave_get_data(slot_id)
+# optional app_id to get other games' save slots
+NG.components.cloudsave_load_slots(app_id = "")
+NG.components.cloudsave_load_slot(slot_id, app_id = "")
+NG.components.cloudsave_get_data(slot_id, app_id = "")
+
 NG.components.cloudsave_set_data(slot_id, data_string)
+NG.components.cloudsave_clear_slot(slot_id)
 ```
 
 You can listen to the request done by these calls:

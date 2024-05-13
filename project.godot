@@ -12,16 +12,25 @@ config_version=5
 
 config/name="newgrounds.io"
 run/main_scene="res://example_scene.tscn"
-config/features=PackedStringArray("4.2", "GL Compatibility")
+config/features=PackedStringArray("4.3", "GL Compatibility")
 
 [autoload]
 
 NG="*res://addons/newgrounds/scripts/newgrounds.tscn"
 NGCloudSave="*res://addons/newgrounds/scripts/newgrounds_cloudsave.gd"
+SaveData="*res://addons/newgrounds/examples/example_root_cloudsave_data.gd"
 
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/newgrounds/plugin.cfg")
+
+[global_group]
+
+CloudSave="Newgrounds Cloudsave"
+
+[newgrounds.io]
+
+opened_getting_started_page=true
 
 [rendering]
 

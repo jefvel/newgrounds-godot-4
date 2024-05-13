@@ -11,7 +11,6 @@ func on_saves_synced():
 	print("Saves have been synced")
 
 func test():
-	
 	pass
 
 @onready var user_name = $Profile/UserName
@@ -91,6 +90,7 @@ func _on_get_slot_data_pressed():
 
 func _slot_loaded(data):
 	print("Loaded data slot with data %s" % data)
+
 
 func _on_clear_slot_pressed():
 	await NG.cloudsave_clear_slot(1)

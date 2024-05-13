@@ -168,7 +168,6 @@ offset_left = 422.0
 offset_top = 57.0
 offset_right = 688.0
 offset_bottom = 422.0
-scoreboard_id = 13398
 
 [node name="ExampleMedalList" parent="." instance=ExtResource("4_lqp0p")]
 offset_left = 885.0
@@ -194,5 +193,3 @@ script = ExtResource("7_tu0rn")
 [connection signal="pressed" from="Get Slot Data" to="." method="_on_get_slot_data_pressed"]
 [connection signal="pressed" from="Clear Slot" to="." method="_on_clear_slot_pressed"]
 [connection signal="pressed" from="Profile" to="." method="_on_profile_pressed"]
-[connection signal="on_signed_in" from="NewgroundsSessionWatcher" to="." method="_on_newgrounds_session_watcher_on_signed_in"]
-[connection signal="on_signed_out" from="NewgroundsSessionWatcher" to="." method="_on_newgrounds_session_watcher_on_signed_out"]

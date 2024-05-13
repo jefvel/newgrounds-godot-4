@@ -9,9 +9,17 @@ func _enter_tree():
 	add_project_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY, C.MEDALS_PATH, TYPE_STRING, PROPERTY_HINT_DIR, "", false)
 	
 	add_tool_menu_item(C.IMPORT_ACTION_NAME, _import_newgrounds)
+	add_tool_menu_item(C.OPEN_NEWGROUNDS_HELP, _open_docs)
+	
+	ProjectSettings.set_setting("global_group/CloudSave", "Newgrounds Cloudsave")
 
 	if !FileAccess.file_exists(C.IDS_FILE_PATH):
 		_write_template_file([], [])
+	
+	if !ProjectSettings.has_setting("newgrounds.io/opened_getting_started_page"):
+		ProjectSettings.set_setting("newgrounds.io/opened_getting_started_page", true)
+		ProjectSettings.set_as_internal("newgrounds.io/opened_getting_started_page", true)
+		_open_docs()
 	
 	if !ProjectSettings.has_setting("autoload/%s" % C.NEWGROUNDS_AUTOLOAD_NAME):
 		add_autoload_singleton(C.NEWGROUNDS_AUTOLOAD_NAME, C.NEWGROUNDS_AUTOLOAD_NODE)
@@ -21,10 +29,15 @@ func _enter_tree():
 	ProjectSettings.save()
 	
 
+func _open_docs():
+	OS.shell_open("https://github.com/jefvel/newgrounds-godot-4/wiki/Quick-Start")
+	pass
+
 func _exit_tree():
 	remove_autoload_singleton(C.NEWGROUNDS_AUTOLOAD_NAME)
 	remove_autoload_singleton(C.CLOUDSAVE_AUTOLOAD_NAME)
 	remove_tool_menu_item(C.IMPORT_ACTION_NAME)
+	remove_tool_menu_item(C.OPEN_NEWGROUNDS_HELP)
 	pass
 
 var loadedMedals = false;
@@ -54,7 +67,7 @@ func _import_newgrounds():
 	add_child(e);
 	e.init(app_id, aes_key);
 	e.create("ScoreBoard.getBoards", null)
-	e.on_success.connect(scoreboards_get)
+	e.on_response.connect(scoreboards_get)
 	boardRequest = e;
 
 	if medalRequest and is_instance_valid(medalRequest):
@@ -64,26 +77,37 @@ func _import_newgrounds():
 	add_child(e);
 	e.init(app_id, aes_key);
 	e.create("Medal.getList", null)
-	e.on_success.connect(medals_get)
+	e.on_response.connect(medals_get)
 	medalRequest = e;
 	pass
 
-func scoreboards_get(b):
+func scoreboards_get(res:NewgroundsResponse):
+	if (res.error):
+		printerr("Could not get scoreboards: %s" % res.error_message)
+		return
+	var b = res.data;
 	scoreboardList = b.scoreboards;
 	loadedScoreboards = true
 	_write_ids()
 	
 const NewgroundsImage = preload("res://addons/newgrounds/scripts/newgrounds_image.gd")
 
-func medals_get(medals):
+func medals_get(res: NewgroundsResponse):
+	if (res.error):
+		printerr("Could not get medals: %s" % res.error_message)
+		return
+	var data = res.data;
 	var medal_dir = ProjectSettings.get_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY)
 	if !FileAccess.file_exists(medal_dir):
 		DirAccess.make_dir_absolute(medal_dir)
 	
 	var used_names = {}
 	const medal_names = preload("res://addons/newgrounds/data/newgrounds_ids.gd").MedalIdsToResource.medals
-	for m in medals.medals:
-		var medal_name = m.name.to_snake_case();
+	const not_allowed = [':',"'",'/,','\\','?','*','"','|', '%','<','>']
+	for m in data.medals:
+		var medal_name: String = m.name.to_snake_case();
+		for c in not_allowed:
+			medal_name = medal_name.replace(c, "")
 		if (used_names.has(medal_name)):
 			used_names[medal_name] = used_names[medal_name] + 1
 			medal_name += "_%s" % used_names[medal_name]

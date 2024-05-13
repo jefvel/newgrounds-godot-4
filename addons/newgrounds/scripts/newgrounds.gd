@@ -19,10 +19,6 @@ var signed_in : bool = false;
 ## Emitted when starting session/signing in/signing out
 signal on_session_change(session: NewgroundsSession)
 
-## Emitted when savedata has been uploaded/downloaded, 
-## and offline scoreboards & medals have been synced
-signal on_saves_synced()
-
 signal on_signed_in();
 signal on_signed_out();
 
@@ -36,6 +32,10 @@ var medal_score: int = 0; ## Stores the user's total medal score, fetched with m
 signal on_medals_loaded(medals:Array[MedalResource]);
 signal on_medal_unlocked(medal_id:int);
 signal on_medal_score_get(score:int);
+
+## Emitted when savedata has been uploaded/downloaded, 
+## and offline scoreboards & medals have been synced
+signal on_saves_synced()
 
 var save_slots:Dictionary = {};
 signal on_cloudsave_slots_loaded();

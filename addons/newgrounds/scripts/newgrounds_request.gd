@@ -82,8 +82,8 @@ func create(component, parameters, result_field = "", encrypt = true) -> HTTPReq
 		
 	var input_parameters = {
 		"app_id": app_id,
-		# "debug": true,
 		"call": call,
+		# "debug": true,
 	}
 	
 	if (session.id):
@@ -114,14 +114,12 @@ func custom_request(url: String):
 	_custom_call = true;
 	request(url)
 
-func _request_completed(result, response_code, headers, body):
+func _request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	queue_free()
 
-	
 	pending = false;
 	var resp = NewgroundsResponse.new()
 	
-		
 	if result != RESULT_SUCCESS:
 		resp.error = ERR_FAILED_REQUEST
 		resp.error_message = "Could not fulfill request."
@@ -129,12 +127,11 @@ func _request_completed(result, response_code, headers, body):
 		on_response.emit(resp);
 		on_error.emit(resp.error_message);
 		return
-		pass
 	
 	var body_string = body.get_string_from_utf8()
 	
 	if _custom_call:
-		if response_code == 200:
+		if response_code >= 200 and response_code < 300:
 			resp.data = body_string
 			on_success.emit(body_string)
 			on_response.emit(resp)
@@ -144,12 +141,22 @@ func _request_completed(result, response_code, headers, body):
 			on_response.emit(resp)
 			on_error.emit(body_string);
 		return
-	
+		
+
+
 	var res = JSON.parse_string(body_string)
-	# res null, response_code 405 not allowed when under maintenance
+	if res == null and response_code < 200 or response_code > 299:
+		resp.error = ERR_FAILED_REQUEST
+		resp.error_message = "Request error code %s" % response_code
+		if response_code == 405:
+			resp.error_message += ". Newgrounds might be under maintenance."
+		resp.data = null;
+		on_response.emit(resp);
+		on_error.emit(resp.error_message)
+		return
+		
 	if !res.success:
 		on_error.emit(res.error)
-		
 		resp.error = FAILED
 		resp.error_message = res.error
 		on_response.emit(resp)
@@ -158,7 +165,6 @@ func _request_completed(result, response_code, headers, body):
 	var d = res.result.data;
 	if !d.success:
 		on_error.emit(d.error)
-		
 		resp.error = d.error.code if d.error.code != 0 else ERR_FAILED_REQUEST
 		resp.error_message = d.error.message
 		on_response.emit(resp)

@@ -1,0 +1,78 @@
+[gd_scene load_steps=3 format=3 uid="uid://yjybvr6kfrvo"]
+
+[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="1_qwmhj"]
+[ext_resource type="Script" path="res://addons/newgrounds/examples/sign_in_form.gd" id="3_d4y5h"]
+
+[node name="ExampleSignInForm" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NewgroundsSessionWatcher" type="Node" parent="."]
+script = ExtResource("1_qwmhj")
+
+[node name="SignInForm" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.249526, 0.209825, 0.19624, 1)
+script = ExtResource("3_d4y5h")
+
+[node name="SigningInButtons" type="VBoxContainer" parent="SignInForm"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -93.0
+offset_top = -29.0
+offset_right = 93.0
+offset_bottom = 29.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SigningInText" type="Label" parent="SignInForm/SigningInButtons"]
+layout_mode = 2
+text = "Signing in..."
+horizontal_alignment = 1
+
+[node name="CancelSignIn" type="Button" parent="SignInForm/SigningInButtons"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="SignInButtons" type="VBoxContainer" parent="SignInForm"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -93.0
+offset_top = -33.0
+offset_right = 93.0
+offset_bottom = 33.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SignIn" type="Button" parent="SignInForm/SignInButtons"]
+layout_mode = 2
+text = "Sign In To Newgrounds"
+
+[node name="SkipSignIn" type="Button" parent="SignInForm/SignInButtons"]
+layout_mode = 2
+text = "Skip"
+
+[connection signal="on_not_signed_in" from="NewgroundsSessionWatcher" to="SignInForm" method="_on_not_signed_in"]
+[connection signal="on_signed_in" from="NewgroundsSessionWatcher" to="SignInForm" method="_on_signed_in"]
+[connection signal="on_signin_cancelled" from="NewgroundsSessionWatcher" to="SignInForm" method="_on_signin_cancel"]
+[connection signal="on_signin_started" from="NewgroundsSessionWatcher" to="SignInForm" method="_on_signin_started"]
+[connection signal="pressed" from="SignInForm/SigningInButtons/CancelSignIn" to="SignInForm" method="_on_cancel_sign_in_pressed"]
+[connection signal="pressed" from="SignInForm/SignInButtons/SignIn" to="SignInForm" method="_on_sign_in_pressed"]
+[connection signal="pressed" from="SignInForm/SignInButtons/SkipSignIn" to="SignInForm" method="_on_skip_sign_in_pressed"]

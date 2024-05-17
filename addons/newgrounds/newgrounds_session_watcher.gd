@@ -2,17 +2,46 @@
 ## A node used for tracking the logged in status of a Newgrounds user. 
 class_name NewgroundsSessionWatcher extends Node
 
+enum SignInState {
+	Checking,
+	SignedIn,
+	SignedOut,
+}
+
 var signed_in: bool;
 
 var user_name: String;
 
 var session: NewgroundsSession;
 
+var state: SignInState = SignInState.Checking;
+
+## Emitted once the player is confirmed to be signed in and ready.
 signal on_signed_in();
+## Emitted when the player is not signed in to newgrounds after checking the session
+signal on_not_signed_in;
+
+## Emitted when the player initiates the sign in process
+signal on_signin_started;
+## Emitted if the user manually cancels the sign in or declines the Newgrounds Passport prompt
+signal on_signin_cancelled;
+
+## Emitted once the user has manually signed out.
 signal on_signed_out();
+
+signal on_session_change(s: NewgroundsSession);
+
 
 func _ready():
 	NG.on_session_change.connect(_session_change)
+	NG.on_signin_cancelled.connect(on_signin_cancelled.emit)
+	NG.on_signin_started.connect(on_signin_started.emit)
+	
+	if !NG.refreshing_session:
+		if NG.signed_in:
+			_is_signed_in();
+		else:
+			NG.refresh_session()
 	pass
 
 func _session_change(s: NewgroundsSession):
@@ -27,6 +56,25 @@ func _session_change(s: NewgroundsSession):
 			on_signed_out.emit()
 	
 	signed_in = is_signed_in
+	
+	if is_signed_in:
+		_is_signed_in()
+	else:
+		_is_signed_out()
+	
+	on_session_change.emit(s);
+
+func _is_signed_in():
+	if state == SignInState.SignedIn:
+		return
+	state = SignInState.SignedIn;
+	on_signed_in.emit();
+	
+func _is_signed_out():
+	if state == SignInState.SignedOut:
+		return
+	state = SignInState.SignedOut;
+	on_not_signed_in.emit()
 
 func sign_in():
 	if !NG.signed_in:

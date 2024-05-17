@@ -62,7 +62,7 @@ func _ready():
 	auto_init = ProjectSettings.get_setting(C.AUTO_INIT_PROPERTY, true);
 	
 	var aes_bytes = Marshalls.base64_to_raw(aes_key)
-	var aes_bits = aes_bytes.size() < < 3;
+	var aes_bits = aes_bytes.size() << 3;
 	
 	assert(aes_bits == 256||aes_bits == 128, "Newgrounds AES Key Required (Assign it in the project settings)")
 	assert(app_id, "Newgrounds App ID Required (Assign it in the project settings)")

@@ -89,7 +89,6 @@ func init():
 	_p("init")
 	refresh_session()
 
-var _retrying_signin = false
 ## Starts a session & launches newgrounds passport in case user
 ## has not logged in. If logged in, this will do nothing.
 func sign_in():
@@ -151,7 +150,7 @@ func refresh_session() -> NewgroundsRequest:
 
 ## Session stuff
 #############
-func _session_start(force: bool=false) -> NewgroundsRequest:
+func _session_start() -> NewgroundsRequest:
 	_p('Session start')
 	var req = components.app_start_session()
 	req.on_response.connect(_session_change)
@@ -201,7 +200,7 @@ func _sync_offline_data():
 ## Scoreboards
 ###############
 func scoreboard_get_scores(scoreboard_id: int, limit: int=10, skip: int=0, period: String="D", social: bool=false, user: String="", tag: String="") -> Array[NewgroundsScoreboardItem]:
-	var res = components.scoreboard_get_scores(scoreboard_id, limit, skip, period, social, user, tag).on_response
+	var res = await components.scoreboard_get_scores(scoreboard_id, limit, skip, period, social, user, tag).on_response
 	if res.error:
 		return []
 	var score_list: Array[NewgroundsScoreboardItem] = [];
@@ -229,10 +228,12 @@ func scoreboard_submit_time(scoreboard_id: int, seconds: float) -> NewgroundsSco
 ############
 
 ## Lists medals, emits on_medals_loaded
-func medal_get_list(app_id: String="") -> Array[MedalResource]:
-	var is_external = app_id != "" and app_id != self.app_id;
+func medal_get_list(app_id_override: String="") -> Array[MedalResource]:
+	var is_external = app_id_override != "" and app_id_override != app_id;
 	
-	var res = await components.medal_get_list(app_id).on_response
+	var _app_id = app_id_override if app_id_override != "" else app_id;
+	
+	var res = await components.medal_get_list(_app_id).on_response
 	
 	if res.error:
 		if !is_external:
@@ -350,7 +351,6 @@ func cloudsave_set_data(slot_id: int, data: String) -> NewgroundsSaveSlot:
 		return slot
 	
 	return null
-	pass
 
 ## Clears saveslot both remotely and in the local cache
 ## Returns true on success, otherwise false.
@@ -363,7 +363,6 @@ func cloudsave_clear_slot(slot_id: int) -> bool:
 		on_cloudsave_cleared.emit(slot_id);
 		return true
 	return false
-	pass
 
 func cloudsave_load_slot(slot_id: int) -> NewgroundsSaveSlot:
 	var res = await components.cloudsave_load_slot(slot_id).on_response

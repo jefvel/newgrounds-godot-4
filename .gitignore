@@ -19,3 +19,5 @@ addons/newgrounds/data/newgrounds_ids.gd
 
 *.sav
 *.tmp
+
+.DS_store

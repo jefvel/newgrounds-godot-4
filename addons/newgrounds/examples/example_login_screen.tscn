@@ -10,6 +10,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("3_d4y5h")
 
 [node name="NewgroundsSessionWatcher" type="Node" parent="."]
 script = ExtResource("1_qwmhj")
@@ -22,7 +23,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.249526, 0.209825, 0.19624, 1)
-script = ExtResource("3_d4y5h")
 
 [node name="SigningInButtons" type="VBoxContainer" parent="SignInForm"]
 layout_mode = 1
@@ -69,10 +69,10 @@ text = "Sign In To Newgrounds"
 layout_mode = 2
 text = "Skip"
 
-[connection signal="on_not_signed_in" from="NewgroundsSessionWatcher" to="SignInForm" method="_on_not_signed_in"]
-[connection signal="on_signed_in" from="NewgroundsSessionWatcher" to="SignInForm" method="_on_signed_in"]
-[connection signal="on_signin_cancelled" from="NewgroundsSessionWatcher" to="SignInForm" method="_on_signin_cancel"]
-[connection signal="on_signin_started" from="NewgroundsSessionWatcher" to="SignInForm" method="_on_signin_started"]
-[connection signal="pressed" from="SignInForm/SigningInButtons/CancelSignIn" to="SignInForm" method="_on_cancel_sign_in_pressed"]
-[connection signal="pressed" from="SignInForm/SignInButtons/SignIn" to="SignInForm" method="_on_sign_in_pressed"]
-[connection signal="pressed" from="SignInForm/SignInButtons/SkipSignIn" to="SignInForm" method="_on_skip_sign_in_pressed"]
+[connection signal="on_not_signed_in" from="NewgroundsSessionWatcher" to="." method="_on_not_signed_in"]
+[connection signal="on_signed_in" from="NewgroundsSessionWatcher" to="." method="_on_signed_in"]
+[connection signal="on_signin_cancelled" from="NewgroundsSessionWatcher" to="." method="_on_signin_cancel"]
+[connection signal="on_signin_started" from="NewgroundsSessionWatcher" to="." method="_on_signin_started"]
+[connection signal="pressed" from="SignInForm/SigningInButtons/CancelSignIn" to="." method="_on_cancel_sign_in_pressed"]
+[connection signal="pressed" from="SignInForm/SignInButtons/SignIn" to="." method="_on_sign_in_pressed"]
+[connection signal="pressed" from="SignInForm/SignInButtons/SkipSignIn" to="." method="_on_skip_sign_in_pressed"]

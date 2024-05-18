@@ -2,19 +2,11 @@
 ## A node used for tracking the logged in status of a Newgrounds user. 
 class_name NewgroundsSessionWatcher extends Node
 
-enum SignInState {
-	Checking,
-	SignedIn,
-	SignedOut,
-}
-
 var signed_in: bool;
 
 var user_name: String;
 
 var session: NewgroundsSession;
-
-var state: SignInState = SignInState.Checking;
 
 ## Emitted once the player is confirmed to be signed in and ready.
 signal on_signed_in();
@@ -39,7 +31,7 @@ func _ready():
 	
 	if !NG.refreshing_session:
 		if NG.signed_in:
-			_is_signed_in();
+			on_signed_in.emit();
 		else:
 			NG.refresh_session()
 	pass
@@ -57,23 +49,13 @@ func _session_change(s: NewgroundsSession):
 	
 	signed_in = is_signed_in
 	
-	if is_signed_in:
-		_is_signed_in()
-	else:
+	if !is_signed_in:
 		_is_signed_out()
 	
 	on_session_change.emit(s);
 
-func _is_signed_in():
-	if state == SignInState.SignedIn:
-		return
-	state = SignInState.SignedIn;
-	on_signed_in.emit();
 	
 func _is_signed_out():
-	if state == SignInState.SignedOut:
-		return
-	state = SignInState.SignedOut;
 	on_not_signed_in.emit()
 
 func sign_in():

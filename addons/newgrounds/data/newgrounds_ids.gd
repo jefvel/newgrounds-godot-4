@@ -12,12 +12,10 @@ enum ScoreboardId {
 
 enum MedalId {
 	None = 0,
-	FallFlaTaaa = 78662,
 
 }
 
 class MedalIdsToResource:
 	const medals = {
-		78662: "res://addons/newgrounds/imported_medals/fall_fla_taaa.tres",
 
 	}

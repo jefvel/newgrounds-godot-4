@@ -38,8 +38,8 @@ func get_medal_unlock_state(medal_id: int):
 	
 func add_failed_scoreboard_post(scoreboard_id: int, score: int):
 	_failed_highscore_posts.push_back({
-		scoreboard_id: scoreboard_id,
-		score: score,
+		"scoreboard_id": scoreboard_id,
+		"score": score,
 	})
 	save()
 

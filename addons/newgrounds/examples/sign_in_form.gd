@@ -1,7 +1,10 @@
 extends Control
 
-@onready var signing_in_buttons: VBoxContainer = $SigningInButtons
-@onready var sign_in_buttons: VBoxContainer = $SignInButtons
+@onready var signing_in_buttons: VBoxContainer = $SignInForm/SigningInButtons
+@onready var sign_in_buttons: VBoxContainer = $SignInForm/SignInButtons
+
+signal on_signed_in;
+signal on_sign_in_skipped;
 
 func _ready() -> void:
 	signing_in_buttons.visible = false;
@@ -13,7 +16,8 @@ func _on_not_signed_in() -> void:
 
 ## The user is signed in and ready to go
 func _on_signed_in() -> void:
-	close()
+	on_signed_in.emit();
+	reset_form()
 
 ## Start signing in process
 func _on_sign_in_pressed() -> void:
@@ -26,15 +30,15 @@ func _on_signin_started():
 ## Happens when clicking the cancel button, or if the NG passport
 ## dialog was declined
 func _on_signin_cancel():
+	reset_form()
+	
+func reset_form():
 	signing_in_buttons.visible = false;
 	sign_in_buttons.visible = true;
-
-func close():
-	visible = false;
-	get_parent().queue_free()
+	
 	
 func _on_skip_sign_in_pressed() -> void:
-	close()
+	on_sign_in_skipped.emit()
 
 func _on_cancel_sign_in_pressed() -> void:
 	NG.sign_in_cancel()

@@ -237,7 +237,11 @@ func medal_get_list(app_id_override: String="") -> Array[MedalResource]:
 	
 	if res.error:
 		if !is_external:
-			return medals.values()
+			var converted: Array[MedalResource] = []
+			for val in medals.values():
+				if val is MedalResource:
+					converted.push_back(val)
+			return converted
 		print("Could not get external medals. Make sure the app ID is correct and allowed in your project settings.")
 		return []
 	

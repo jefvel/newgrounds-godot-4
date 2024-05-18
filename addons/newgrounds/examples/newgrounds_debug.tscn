@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://xcwcga3on6gp"]
+[gd_scene load_steps=9 format=3 uid="uid://xcwcga3on6gp"]
 
 [ext_resource type="Script" path="res://addons/newgrounds/examples/newgrounds_debug.gd" id="1_e2xbo"]
 [ext_resource type="Script" path="res://addons/newgrounds/examples/ExampleSaveData.gd" id="2_5kj3a"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://cafxm6acw5lcl" path="res://addons/newgrounds/examples/example_medal_list.tscn" id="4_lqp0p"]
 [ext_resource type="Script" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="6_i37bs"]
 [ext_resource type="Script" path="res://addons/newgrounds/newgrounds_medal_unlocker.gd" id="7_tu0rn"]
+[ext_resource type="PackedScene" uid="uid://yjybvr6kfrvo" path="res://addons/newgrounds/examples/example_login_screen.tscn" id="8_jot3l"]
 
 [node name="NewgroundsDebugExamples" type="Control"]
 layout_mode = 3
@@ -181,6 +182,10 @@ script = ExtResource("6_i37bs")
 [node name="NewgroundsMedalUnlocker" type="Node" parent="."]
 script = ExtResource("7_tu0rn")
 
+[node name="ExampleSignInForm" parent="." instance=ExtResource("8_jot3l")]
+visible = false
+layout_mode = 1
+
 [connection signal="text_changed" from="ExampleSaveData/TextEdit" to="ExampleSaveData" method="_on_text_edit_text_changed"]
 [connection signal="pressed" from="Log In" to="." method="_on_log_in_pressed"]
 [connection signal="pressed" from="Check Session" to="." method="_on_check_session_pressed"]
@@ -193,3 +198,5 @@ script = ExtResource("7_tu0rn")
 [connection signal="pressed" from="Get Slot Data" to="." method="_on_get_slot_data_pressed"]
 [connection signal="pressed" from="Clear Slot" to="." method="_on_clear_slot_pressed"]
 [connection signal="pressed" from="Profile" to="." method="_on_profile_pressed"]
+[connection signal="on_sign_in_skipped" from="ExampleSignInForm" to="." method="_on_example_sign_in_form_on_sign_in_skipped"]
+[connection signal="on_signed_in" from="ExampleSignInForm" to="." method="_on_example_sign_in_form_on_signed_in"]

@@ -13,22 +13,22 @@ enum MedalUnlockState {
 var _user_id = 0;
 
 var _medal_unlocks = {};
-var _failed_highscore_posts:Array = [];
+var _failed_highscore_posts: Array = [];
 
 var _save_slots = {};
 
-func add_failed_medal_unlock(medal_id:int):
+func add_failed_medal_unlock(medal_id: int):
 	if _medal_unlocks.has(str(medal_id)) and _medal_unlocks[str(medal_id)] == MedalUnlockState.UnlockedNewgrounds:
 		return
 	_medal_unlocks[str(medal_id)] = MedalUnlockState.UnlockedLocal;
 	save()
 
-func set_medal_unlocked(medal_id: int, unlocked = true):
+func set_medal_unlocked(medal_id: int, unlocked=true):
 	_medal_unlocks[str(medal_id)] = MedalUnlockState.UnlockedNewgrounds if unlocked else MedalUnlockState.Locked
 	save()
 	
-func is_medal_unlocked(medal_id:int):
-	var has_value = _medal_unlocks.has(str(medal_id)) 
+func is_medal_unlocked(medal_id: int):
+	var has_value = _medal_unlocks.has(str(medal_id))
 	return has_value and _medal_unlocks[str(medal_id)] != MedalUnlockState.Locked
 
 func get_medal_unlock_state(medal_id: int):
@@ -38,12 +38,12 @@ func get_medal_unlock_state(medal_id: int):
 	
 func add_failed_scoreboard_post(scoreboard_id: int, score: int):
 	_failed_highscore_posts.push_back({
-		"scoreboard_id": scoreboard_id,
-		"score": score,
+		"id": scoreboard_id,
+		"value": score,
 	})
 	save()
 
-func _get_slot_data(slot_id:int):
+func _get_slot_data(slot_id: int):
 	if _save_slots.has(str(slot_id)):
 		return _save_slots[str(slot_id)]
 	
@@ -62,7 +62,7 @@ func clear_slot_data(slot_id: int):
 	slot.data = ''
 	save();
 
-func store_local_slot_data(slot_id: int, data_string: String, timestamp = int(Time.get_unix_time_from_system())):
+func store_local_slot_data(slot_id: int, data_string: String, timestamp=int(Time.get_unix_time_from_system())):
 	var data = _get_slot_data(slot_id);
 	data.data = data_string;
 	data.timestamp = timestamp
@@ -154,7 +154,3 @@ func load():
 		var node_data = json.get_data()
 		for i in node_data.keys():
 			set(i, node_data[i])
-
-
-
-

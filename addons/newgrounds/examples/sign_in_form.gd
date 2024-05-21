@@ -2,6 +2,7 @@ extends Control
 
 @onready var signing_in_buttons: VBoxContainer = $SignInForm/SigningInButtons
 @onready var sign_in_buttons: VBoxContainer = $SignInForm/SignInButtons
+@onready var newgrounds_session_watcher: NewgroundsSessionWatcher = $NewgroundsSessionWatcher
 
 signal on_signed_in;
 signal on_sign_in_skipped;
@@ -9,6 +10,7 @@ signal on_sign_in_skipped;
 func _ready() -> void:
 	signing_in_buttons.visible = false;
 	visible = false;
+	newgrounds_session_watcher.refresh_session()
 
 ## Show signin screen since we're not logged in.
 func _on_not_signed_in() -> void:

@@ -141,12 +141,16 @@ func sign_out():
 	on_signed_out.emit();
 	pass
 
-func refresh_session() -> NewgroundsRequest:
+func refresh_session():
 	_p("refresh_session")
+	if !session.id: # No session id, no need to check if session is valid.
+		offline_mode = true
+		on_session_change.emit(session)
+		return null
+	
 	refreshing_session = true;
 	var res = components.app_check_session()
 	res.on_response.connect(_session_change)
-	return res
 
 ## Session stuff
 #############
@@ -177,7 +181,7 @@ func _session_change(data: NewgroundsResponse):
 	
 	session_started = true;
 	
-	if (!signed_in&&session.user):
+	if (!signed_in && session.user):
 		signed_in = true;
 		signing_in = false;
 		$Pinger.start()

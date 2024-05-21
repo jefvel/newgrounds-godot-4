@@ -23,12 +23,14 @@ signal on_signed_out();
 
 signal on_session_change(s: NewgroundsSession);
 
-
 func _ready():
 	NG.on_session_change.connect(_session_change)
 	NG.on_signin_cancelled.connect(on_signin_cancelled.emit)
 	NG.on_signin_started.connect(on_signin_started.emit)
 	
+	refresh_session()
+
+func refresh_session():
 	if !NG.refreshing_session:
 		if NG.signed_in:
 			on_signed_in.emit();

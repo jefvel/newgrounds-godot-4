@@ -1,6 +1,7 @@
 @icon("res://addons/newgrounds/icons/medal.png")
+extends Node
 ## A node used for unlocking/listening to a Newgrounds medal.
-class_name NewgroundsMedalUnlocker extends Node
+class_name NewgroundsMedalUnlocker
 
 @export var medal_id: NewgroundsIds.MedalId = 0;
 

@@ -8,6 +8,10 @@ enum MedalUnlockState {
 	UnlockedNewgrounds,
 }
 
+# When anonymous, _user_id is 0.
+# Once logged in, it'll change. 
+var _user_id = 0;
+
 var _medal_unlocks = {};
 var _failed_highscore_posts = {};
 
@@ -165,7 +169,3 @@ func load():
 					add_failed_scoreboard_post(p.id, p.value)
 				continue
 			set(i, value)
-
-
-
-

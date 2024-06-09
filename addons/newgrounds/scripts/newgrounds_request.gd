@@ -5,6 +5,7 @@ class_name NewgroundsRequest extends HTTPRequest
 const gateway_uri:String = "https://newgrounds.io/gateway_v3.php"
 
 # Errors
+const ERR_MISSING_CAPTCHA = 1;
 const ERR_FAILED_REQUEST = 999;
 
 const ERR_SESSION_ID_MISSING = 102;
@@ -39,6 +40,7 @@ func init(app_id: String, aes_key: String, session:NewgroundsSession = Newground
 	
 	self.session = session;
 	self.aes = aes_context;
+	self.timeout = 10.0
 	
 func create(component, parameters, result_field = "", encrypt = true) -> HTTPRequest:
 	_result_field = result_field
@@ -88,7 +90,7 @@ func create(component, parameters, result_field = "", encrypt = true) -> HTTPReq
 	
 	if (session.id):
 		input_parameters.session_id = session.id
-
+	
 	var reqErr = request(
 		gateway_uri,
 		["Content-Type: application/x-www-form-urlencoded"],
@@ -143,7 +145,6 @@ func _request_completed(result: int, response_code: int, headers: PackedStringAr
 		return
 		
 
-
 	var res = JSON.parse_string(body_string)
 	if res == null and response_code < 200 or response_code > 299:
 		resp.error = ERR_FAILED_REQUEST
@@ -186,4 +187,3 @@ func generate_iv() -> PackedByteArray:
 	for i in range(16):
 		arr.set(i, randi() % 0xff)
 	return arr
-

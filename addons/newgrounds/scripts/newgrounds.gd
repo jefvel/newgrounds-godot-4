@@ -89,25 +89,45 @@ func init():
 	_p("init")
 	refresh_session()
 
+var _sign_in_request: NewgroundsRequest;
 ## Starts a session & launches newgrounds passport in case user
 ## has not logged in. If logged in, this will do nothing.
 func sign_in():
 	_p("sign_in")
 	if !signing_in:
 		on_signin_started.emit()
-	var s = await components.app_check_session().on_response
+	signing_in = true;
+	
+	if is_instance_valid(_sign_in_request):
+		_sign_in_request.cancel()
+	
+	_sign_in_request =  components.app_check_session()
+	var s = await _sign_in_request.on_response
+	
+	# login was canceled while checking session
+	if !signing_in:
+		return
+	
 	if s.error:
 		session.reset()
-	if (session.is_signed_in()&&!session.expired):
+	
+	if (session.is_signed_in() && !session.expired):
+		signing_in = false;
 		on_signed_in.emit()
 		return
+	
 	if (!session.passport_url.is_empty()):
-		signing_in = true;
 		$Pinger.start()
 		OS.shell_open(session.passport_url)
 	else:
+		
 		var req = _session_start()
+		_sign_in_request = req;
 		var res = await req.on_response
+		
+		if !signing_in:
+			return;
+			
 		if res.error != NewgroundsRequest.ERR_FAILED_REQUEST:
 			# retry signin
 			sign_in()
@@ -123,6 +143,8 @@ func sign_in_cancel():
 	signing_in = false;
 	$Pinger.stop()
 	on_signin_cancelled.emit();
+	if is_instance_valid(_sign_in_request):
+		_sign_in_request.cancel()
 
 ## Signs the user out from newgrounds.io and ends the current session
 func sign_out():
@@ -163,9 +185,12 @@ func _session_start() -> NewgroundsRequest:
 func _session_change(data: NewgroundsResponse):
 	refreshing_session = false;
 	if (data.error):
-		if data.error == NewgroundsRequest.ERR_FAILED_REQUEST:
+		if data.error == NewgroundsRequest.ERR_FAILED_REQUEST or data.error == NewgroundsRequest.ERR_MISSING_CAPTCHA:
 			offline_mode = true;
 			_p("Offline mode: true")
+			on_session_change.emit(session)
+			if signing_in:
+				sign_in_cancel()
 			return ;
 
 		if !session_started:
@@ -440,7 +465,7 @@ func _save_session():
 
 func _notification(what):
 	match what:
-		NOTIFICATION_WM_WINDOW_FOCUS_IN:
+		NOTIFICATION_WM_WINDOW_FOCUS_IN, NOTIFICATION_APPLICATION_FOCUS_IN:
 			if signing_in:
 				refresh_session.call_deferred()
 			pass

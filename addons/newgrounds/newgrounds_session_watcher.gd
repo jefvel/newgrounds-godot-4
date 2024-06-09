@@ -27,8 +27,8 @@ func _ready():
 	NG.on_session_change.connect(_session_change)
 	NG.on_signin_cancelled.connect(on_signin_cancelled.emit)
 	NG.on_signin_started.connect(on_signin_started.emit)
-	
 	refresh_session()
+	pass
 
 func refresh_session():
 	if !NG.refreshing_session:
@@ -49,13 +49,12 @@ func _session_change(s: NewgroundsSession):
 		if signed_in:
 			on_signed_out.emit()
 	
-	signed_in = is_signed_in
-	
 	if !is_signed_in:
 		_is_signed_out()
+		
+	signed_in = is_signed_in
 	
 	on_session_change.emit(s);
-
 	
 func _is_signed_out():
 	on_not_signed_in.emit()

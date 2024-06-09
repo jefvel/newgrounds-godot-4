@@ -85,6 +85,3 @@ func load():
 		var node_data = json.get_data()
 		for i in node_data.keys():
 			set(i, node_data[i])
-
-
-

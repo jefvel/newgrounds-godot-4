@@ -16,4 +16,4 @@ script = ExtResource("3_28bnn")
 [node name="Pinger" type="Timer" parent="."]
 wait_time = 60.0
 
-[connection signal="timeout" from="Pinger" to="." method="_refresh_session"]
+[connection signal="timeout" from="Pinger" to="." method="refresh_session"]

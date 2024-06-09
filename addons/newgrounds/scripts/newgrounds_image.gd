@@ -73,4 +73,3 @@ func _http_request_completed(result, response_code, headers:PackedStringArray, b
 		cached_images[url] = texture;
 	on_image_loaded.emit(texture);
 	request.queue_free()
-

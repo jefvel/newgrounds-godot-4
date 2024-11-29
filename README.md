@@ -67,9 +67,10 @@ print("Time submitted!")
 ### Get scores
 
 ```gdscript
+var limit = 10;
 var scores = await NG.scoreboard_get_scores(scoreboard_id, limit)
 for score in scores:
-	print("user %s has the score %s" % [score.name, score.formatted_value])
+	print("user %s has the score %s" % [score.user.name, score.formatted_value])
 ```
 
 ## Cloud save & load

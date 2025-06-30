@@ -175,7 +175,7 @@ func _write_template_file(scoreboardList, medalList):
 		if _starts_with_nonletter(boardName):
 			boardName = '_%s' % boardName
 		
-		boardString += "	%s = %s,\n" % [boardName, b.id]
+		boardString += "	%s = %s,\n" % [boardName, int(b.id)]
 		
 	var used_names = {}
 	for m in medalList:

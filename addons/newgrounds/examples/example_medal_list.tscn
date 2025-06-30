@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cafxm6acw5lcl"]
 
-[ext_resource type="Script" path="res://addons/newgrounds/examples/example_medal_list.gd" id="1_ktfmy"]
+[ext_resource type="Script" uid="uid://btka7t7nkprgo" path="res://addons/newgrounds/examples/example_medal_list.gd" id="1_ktfmy"]
 
 [node name="ExampleMedalList" type="Control"]
 layout_mode = 3

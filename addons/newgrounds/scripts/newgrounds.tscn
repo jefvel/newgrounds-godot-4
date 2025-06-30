@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://cx0lbddb6da4w"]
 
-[ext_resource type="Script" path="res://addons/newgrounds/scripts/newgrounds.gd" id="1_ktbj2"]
-[ext_resource type="Script" path="res://addons/newgrounds/scripts/newgrounds_components.gd" id="2_kgbri"]
-[ext_resource type="Script" path="res://addons/newgrounds/scripts/newgrounds_offline_data.gd" id="3_28bnn"]
+[ext_resource type="Script" uid="uid://ca76xmhaxuoka" path="res://addons/newgrounds/scripts/newgrounds.gd" id="1_ktbj2"]
+[ext_resource type="Script" uid="uid://c51dji2grld70" path="res://addons/newgrounds/scripts/newgrounds_components.gd" id="2_kgbri"]
+[ext_resource type="Script" uid="uid://dv4gihl1s2xo1" path="res://addons/newgrounds/scripts/newgrounds_offline_data.gd" id="3_28bnn"]
 
 [node name="Newgrounds" type="Node"]
 script = ExtResource("1_ktbj2")

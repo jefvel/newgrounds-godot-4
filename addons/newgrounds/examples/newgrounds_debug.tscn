@@ -1,12 +1,12 @@
 [gd_scene load_steps=9 format=3 uid="uid://xcwcga3on6gp"]
 
-[ext_resource type="Script" path="res://addons/newgrounds/examples/newgrounds_debug.gd" id="1_e2xbo"]
-[ext_resource type="Script" path="res://addons/newgrounds/examples/ExampleSaveData.gd" id="2_5kj3a"]
+[ext_resource type="Script" uid="uid://btrvhxpx86k87" path="res://addons/newgrounds/examples/newgrounds_debug.gd" id="1_e2xbo"]
+[ext_resource type="Script" uid="uid://ixpyi3twpto4" path="res://addons/newgrounds/examples/ExampleSaveData.gd" id="2_5kj3a"]
 [ext_resource type="PackedScene" uid="uid://b2rnbblsa42pm" path="res://addons/newgrounds/examples/example_scoreboard.tscn" id="3_gp5e1"]
 [ext_resource type="PackedScene" uid="uid://dgf2xfu4r0mtd" path="res://addons/newgrounds/newgrounds_user_avatar.tscn" id="3_vopvl"]
 [ext_resource type="PackedScene" uid="uid://cafxm6acw5lcl" path="res://addons/newgrounds/examples/example_medal_list.tscn" id="4_lqp0p"]
-[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="6_i37bs"]
-[ext_resource type="Script" path="res://addons/newgrounds/newgrounds_medal_unlocker.gd" id="7_tu0rn"]
+[ext_resource type="Script" uid="uid://2ueiminarn3y" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="6_i37bs"]
+[ext_resource type="Script" uid="uid://dxu5nxiql0qyj" path="res://addons/newgrounds/newgrounds_medal_unlocker.gd" id="7_tu0rn"]
 [ext_resource type="PackedScene" uid="uid://yjybvr6kfrvo" path="res://addons/newgrounds/examples/example_login_screen.tscn" id="8_jot3l"]
 
 [node name="NewgroundsDebugExamples" type="Control"]
@@ -183,7 +183,6 @@ script = ExtResource("6_i37bs")
 script = ExtResource("7_tu0rn")
 
 [node name="ExampleSignInForm" parent="." instance=ExtResource("8_jot3l")]
-visible = false
 layout_mode = 1
 
 [connection signal="text_changed" from="ExampleSaveData/TextEdit" to="ExampleSaveData" method="_on_text_edit_text_changed"]

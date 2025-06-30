@@ -179,7 +179,7 @@ func _write_template_file(scoreboardList, medalList):
 		
 	var used_names = {}
 	for m in medalList:
-		medalResource += '		%s: "%s",\n' % [m.id, m.resource_path]
+		medalResource += '		%s: "%s",\n' % [int(m.id), m.resource_path]
 		var medal_name: String = m.name;
 		medal_name = _clean_name(medal_name)
 		if _starts_with_nonletter(medal_name):
@@ -189,7 +189,7 @@ func _write_template_file(scoreboardList, medalList):
 			medal_name += "_%s" % used_names[medal_name]
 		else:
 			used_names[medal_name] = 1
-		medalString += "	%s = %s,\n" % [medal_name, m.id]
+		medalString += "	%s = %s,\n" % [medal_name, int(m.id)]
 	
 	var f = FileAccess.get_file_as_string(C.NEWGROUNDS_IDS_TEMPLATE)
 	var s = f % [boardString, medalString, medalResource]

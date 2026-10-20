@@ -23,8 +23,6 @@ const CONFIG_PATH 			= "res://newgrounds_config.cfg"
 const CONFIG_ACTION_NAME 	= "Configure Newgrounds App ID and AES Key"
 const CONFIG_SCENE 			= "res://addons/newgrounds/tools/newgrounds_configuration.tscn"
 
-
-const IMPORT_ACTION_NAME 		= "Import Newgrounds Medals & Scoreboards"
 const OPEN_NEWGROUNDS_HELP		= "Open Newgrounds Addon Help Page"
 const NEWGROUNDS_IDS_TEMPLATE	= "res://addons/newgrounds/data/newgrounds_ids_template.txt"
 const IDS_FILE_PATH 			= "res://addons/newgrounds/data/newgrounds_ids.gd"

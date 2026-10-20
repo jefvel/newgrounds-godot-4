@@ -32,18 +32,18 @@ func _on_signed_in() -> void:
 ## Start signing in process
 func _on_sign_in_pressed() -> void:
 	NG.sign_in()
-	
+
 func _on_signin_started():
 	anim.play("logging_in")
-	
+
 ## Happens when clicking the cancel button, or if the NG passport
 ## dialog was declined
 func _on_signin_cancel():
 	reset_form()
-	
+
 func reset_form():
 	anim.play("cancel_login")
-	
+
 func _on_skip_sign_in_pressed() -> void:
 	on_sign_in_skipped.emit()
 

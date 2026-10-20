@@ -6,52 +6,38 @@ const DotEnv = preload("res://addons/newgrounds/scripts/newgrounds_dotenv.gd")
 const Exporter = preload("res://addons/newgrounds/tools/newgrounds_exporter.gd")
 const Config = preload("res://addons/newgrounds/scripts/newgrounds_config.gd")
 
+signal import_finished(success: bool, message: String)
+
 var _exporter: EditorExportPlugin
 var _project_settings_tab: Control
 
 func _enter_tree():
 	_migrate_legacy_credentials()
 
-	add_project_setting(C.AUTO_INIT_PROPERTY, true, TYPE_BOOL)
+	add_project_setting(C.AUTO_INIT_PROPERTY, true, TYPE_BOOL, PROPERTY_HINT_NONE, "", false)
 	add_project_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY, C.MEDALS_PATH, TYPE_STRING, PROPERTY_HINT_DIR, "", false)
-	
+
 	_exporter = Exporter.new()
 	add_export_plugin(_exporter)
-	
-	add_tool_menu_item(C.IMPORT_ACTION_NAME, _import_newgrounds)
-	add_tool_menu_item(C.OPEN_NEWGROUNDS_HELP, _open_docs)
 
 	_add_project_settings_tab()
 
-	
 	ProjectSettings.set_setting("global_group/CloudSave", "Newgrounds Cloudsave")
 
 	if !FileAccess.file_exists(C.IDS_FILE_PATH):
 		_write_template_file([], [])
-	
-	if !ProjectSettings.has_setting("newgrounds.io/opened_getting_started_page"):
-		ProjectSettings.set_setting("newgrounds.io/opened_getting_started_page", true)
-		ProjectSettings.set_as_internal("newgrounds.io/opened_getting_started_page", true)
-		_open_docs()
-	
+
 	if !ProjectSettings.has_setting("autoload/%s" % C.NEWGROUNDS_AUTOLOAD_NAME):
 		add_autoload_singleton(C.NEWGROUNDS_AUTOLOAD_NAME, C.NEWGROUNDS_AUTOLOAD_NODE)
 	if !ProjectSettings.has_setting("autoload/%s" % C.CLOUDSAVE_AUTOLOAD_NAME):
 		add_autoload_singleton(C.CLOUDSAVE_AUTOLOAD_NAME, C.CLOUDSAVE_AUTOLOAD_NODE)
-		
-	ProjectSettings.save()
-	
 
-func _open_docs():
-	OS.shell_open("https://github.com/jefvel/newgrounds-godot-4/wiki/Quick-Start")
-	pass
+	ProjectSettings.save()
 
 func _exit_tree():
 	remove_autoload_singleton(C.NEWGROUNDS_AUTOLOAD_NAME)
 	remove_autoload_singleton(C.CLOUDSAVE_AUTOLOAD_NAME)
-	remove_tool_menu_item(C.CONFIG_ACTION_NAME)
-	remove_tool_menu_item(C.IMPORT_ACTION_NAME)
-	remove_tool_menu_item(C.OPEN_NEWGROUNDS_HELP)
+
 	if is_instance_valid(_project_settings_tab):
 		remove_control_from_container(CONTAINER_PROJECT_SETTING_TAB_RIGHT, _project_settings_tab)
 		_project_settings_tab.queue_free()
@@ -63,11 +49,18 @@ func _exit_tree():
 
 func _add_project_settings_tab() -> void:
 	_project_settings_tab = preload(C.CONFIG_SCENE).instantiate()
-	_project_settings_tab.name = "NewgroundsIO"
+	_project_settings_tab.name = "Newgrounds"
 	add_control_to_container(CONTAINER_PROJECT_SETTING_TAB_RIGHT, _project_settings_tab)
+	if _project_settings_tab.has_signal("import_requested"):
+		_project_settings_tab.connect("import_requested", _import_newgrounds)
+	if not import_finished.is_connected(_on_import_finished):
+		import_finished.connect(_on_import_finished)
 
-## Moves app ID / AES key out of ProjectSettings (and therefore project.godot)
-## into the gitignored `.env`.
+func _on_import_finished(success: bool, message: String) -> void:
+	if is_instance_valid(_project_settings_tab):
+		_project_settings_tab.call("show_import_result", success, message)
+
+
 func _migrate_legacy_credentials() -> void:
 	var legacy := {}
 	for pair in [[C.ENV_APP_ID, C.APP_ID_PROPERTY], [C.ENV_AES_KEY, C.AES_KEY_PROPERTY]]:
@@ -101,22 +94,27 @@ var scoreboardList:Array = [];
 
 var medalRequest: NewgroundsRequest;
 var boardRequest: NewgroundsRequest;
+var _import_finished_emitted := false
 func _import_newgrounds():
+	_import_finished_emitted = false;
 	loadedMedals = false;
 	loadedScoreboards = false;
 	medalList = [];
 	scoreboardList = [];
-	
+
 	var app_id = Config.app_id()
 	var aes_key = Config.aes_key()
-	assert(!app_id.is_empty(), "App ID not provided, configure it in Project > Tools > %s" % C.CONFIG_ACTION_NAME)
-	assert(!aes_key.is_empty(), "AES key not provided, configure it in Project > Tools > %s" % C.CONFIG_ACTION_NAME)
-	
+	if app_id.is_empty() or aes_key.is_empty():
+		var message := "Add the App ID and AES key on the NewgroundsIO tab (or in %s) before importing." % C.ENV_FILE
+		printerr("Newgrounds.io - " + message)
+		_finish_import(false, message)
+		return
+
 	if boardRequest and is_instance_valid(boardRequest):
 		boardRequest.cancel()
-	
+
 	print("Newgrounds.io - Getting medals and scoreboards...")
-	
+
 	var e = NewgroundsRequest.new()
 	add_child(e);
 	e.init(app_id, aes_key);
@@ -126,7 +124,7 @@ func _import_newgrounds():
 
 	if medalRequest and is_instance_valid(medalRequest):
 		medalRequest.cancel()
-	
+
 	e = NewgroundsRequest.new()
 	add_child(e);
 	e.init(app_id, aes_key);
@@ -135,26 +133,43 @@ func _import_newgrounds():
 	medalRequest = e;
 	pass
 
+func _finish_import(success: bool, message: String) -> void:
+	if _import_finished_emitted:
+		return
+	_import_finished_emitted = true
+	import_finished.emit(success, message)
+
 func scoreboards_get(res:NewgroundsResponse):
 	if (res.error):
-		printerr("Could not get scoreboards: %s" % res.error_message)
+		var message := "Could not get scoreboards: %s" % res.error_message
+		printerr(message)
+		_finish_import(false, message)
 		return
 	var b = res.data;
 	scoreboardList = b.scoreboards;
 	loadedScoreboards = true
 	_write_ids()
-	
+
 const NewgroundsImage = preload("res://addons/newgrounds/scripts/newgrounds_image.gd")
 
 func medals_get(res: NewgroundsResponse):
 	if (res.error):
-		printerr("Could not get medals: %s" % res.error_message)
+		var message := "Could not get medals: %s" % res.error_message
+		printerr(message)
+		_finish_import(false, message)
 		return
 	var data = res.data;
-	var medal_dir = ProjectSettings.get_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY)
-	if !FileAccess.file_exists(medal_dir):
-		DirAccess.make_dir_absolute(medal_dir)
-	
+	var medal_dir := str(ProjectSettings.get_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY, C.MEDALS_PATH)).strip_edges()
+	if medal_dir.is_empty():
+		medal_dir = C.MEDALS_PATH
+	if not DirAccess.dir_exists_absolute(medal_dir):
+		var err := DirAccess.make_dir_recursive_absolute(medal_dir)
+		if err != OK:
+			var message := "Could not create the medal folder %s: %s" % [medal_dir, error_string(err)]
+			printerr(message)
+			_finish_import(false, message)
+			return
+
 	var used_names = {}
 	const medal_names = preload("res://addons/newgrounds/data/newgrounds_ids.gd").MedalIdsToResource.medals
 	const not_allowed = [':',"'",'/,','\\','?','*','"','|', '%','<','>']
@@ -167,7 +182,7 @@ func medals_get(res: NewgroundsResponse):
 			medal_name += "_%s" % used_names[medal_name]
 		else:
 			used_names[medal_name] = 1
-		
+
 		var old_resource_name = medal_names.get(int(m.id))
 		var resource_name = "%s/%s.tres" % [medal_dir, medal_name]
 		var medal:MedalResource;
@@ -181,10 +196,10 @@ func medals_get(res: NewgroundsResponse):
 		else:
 			medal = MedalResource.fromDict(m)
 			medal.take_over_path(resource_name)
-		
+
 		ResourceSaver.save(medal, resource_name, ResourceSaver.SaverFlags.FLAG_CHANGE_PATH)
 		medalList.push_back(medal)
-		
+
 		var imgReq = NewgroundsImage.new()
 		imgReq.visible = false;
 		add_child(imgReq)
@@ -193,7 +208,7 @@ func medals_get(res: NewgroundsResponse):
 			icon_url = "https:" + icon_url;
 		imgReq.url = icon_url;
 		imgReq.on_image_loaded.connect(_set_medal_icon.bind(medal, resource_name, imgReq))
-		
+
 	loadedMedals = true
 	_write_ids()
 	pass
@@ -208,7 +223,7 @@ func _clean_name(name):
 	var regex = RegEx.new()
 	regex.compile("[^\\w ]")
 	return regex.sub(name, "", true).to_pascal_case()
-	
+
 func _starts_with_nonletter(str):
 	var regex = RegEx.new()
 	regex.compile("^[^a-zA-Z]")
@@ -220,6 +235,7 @@ func _write_ids():
 	_write_template_file(scoreboardList, medalList)
 	print("Newgrounds.io - Wrote Medal and Scoreboard IDs, reload the project to update")
 	get_editor_interface().get_resource_filesystem().scan()
+	_finish_import(true, "Imported %d medals and %d scoreboards. Use \"Reload project\" to apply the new IDs." % [medalList.size(), scoreboardList.size()])
 	pass
 
 func _write_template_file(scoreboardList, medalList):
@@ -231,9 +247,9 @@ func _write_template_file(scoreboardList, medalList):
 		boardName = _clean_name(boardName)
 		if _starts_with_nonletter(boardName):
 			boardName = '_%s' % boardName
-		
+
 		boardString += "	%s = %s,\n" % [boardName, int(b.id)]
-		
+
 	var used_names = {}
 	for m in medalList:
 		medalResource += '		%s: "%s",\n' % [int(m.id), m.resource_path]
@@ -247,7 +263,7 @@ func _write_template_file(scoreboardList, medalList):
 		else:
 			used_names[medal_name] = 1
 		medalString += "	%s = %s,\n" % [medal_name, int(m.id)]
-	
+
 	var f = FileAccess.get_file_as_string(C.NEWGROUNDS_IDS_TEMPLATE)
 	var s = f % [boardString, medalString, medalResource]
 	var file = FileAccess.open(C.IDS_FILE_PATH, FileAccess.WRITE)
@@ -269,12 +285,12 @@ func add_project_setting(name: String, default_value, type: int, hint: int = PRO
 		"hint": hint,
 		"hint_string": hint_string
 	}
-	
+
 	ProjectSettings.add_property_info(setting_info)
 	ProjectSettings.set_initial_value(name, default_value)
 	ProjectSettings.set_as_basic(name, basic)
-	
-	
+
+
 func remove_project_setting(name: String):
 	ProjectSettings.clear(name)
 	pass

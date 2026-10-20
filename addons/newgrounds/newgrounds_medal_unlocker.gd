@@ -5,7 +5,7 @@ class_name NewgroundsMedalUnlocker
 
 @export var medal_id: NewgroundsIds.MedalId = 0;
 
-var unlocked: bool = false;
+@export var unlocked: bool = false;
 
 signal on_unlocked(medal:MedalResource);
 

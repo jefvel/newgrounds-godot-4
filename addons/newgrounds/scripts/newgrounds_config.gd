@@ -1,15 +1,6 @@
 @tool
 class_name NewgroundsConfig
 
-## Resolves the Newgrounds App ID and AES key.
-##
-## Lookup order, first non-empty value wins:
-## 1. `res://.env` in the project folder (editor and local runs).
-## 2. `res://newgrounds_config.cfg`, injected into the PCK by the export plugin.
-## 3. `NEWGROUNDS_APP_ID` / `NEWGROUNDS_AES_KEY` environment variables (CI).
-##
-## The values are never stored in `ProjectSettings`.
-
 const C = preload("res://addons/newgrounds/scripts/newgrounds_consts.gd")
 const DotEnv = preload("res://addons/newgrounds/scripts/newgrounds_dotenv.gd")
 

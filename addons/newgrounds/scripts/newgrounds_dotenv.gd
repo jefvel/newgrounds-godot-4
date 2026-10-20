@@ -1,12 +1,6 @@
 @tool
 class_name NewgroundsDotEnv
 
-## Minimal `.env` reader/writer used by the Newgrounds addon.
-##
-## Supports `KEY=value`, quoted values (`"value"` / `'value'`), `export KEY=value`,
-## comments (`#`) and blank lines. Writing merges into the existing file so
-## unrelated keys and comments are preserved.
-
 static func parse(text: String) -> Dictionary:
 	var values := {}
 	for raw in text.split("\n"):
@@ -34,8 +28,6 @@ static func load_file(path: String) -> Dictionary:
 	file.close()
 	return parse(text)
 
-## Writes [param values] into [param path], updating existing keys in place and
-## appending missing ones. Everything else in the file is left untouched.
 static func save_values(path: String, values: Dictionary) -> Error:
 	var lines: Array[String] = []
 	var written := {}

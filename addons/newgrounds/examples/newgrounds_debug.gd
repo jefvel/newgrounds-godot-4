@@ -80,6 +80,7 @@ func _on_save_slot_pressed():
 func _on_get_slot_data_pressed():
 	var btn = $"Get Slot Data"
 	var orig_text = btn.text
+	print("Loading CloudSave data...")
 	btn.text = "Loading..."
 	await NGCloudSave.load_game()
 	btn.text = orig_text

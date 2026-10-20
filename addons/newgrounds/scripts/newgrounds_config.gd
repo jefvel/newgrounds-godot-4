@@ -13,7 +13,6 @@ static func app_id() -> String:
 static func aes_key() -> String:
 	return _resolve(C.ENV_AES_KEY)
 
-## Drops the cached values so a freshly written `.env` is picked up.
 static func reload() -> void:
 	_loaded = false
 	_values.clear()

@@ -67,7 +67,6 @@ func load_game(save_slot:int = 1) -> void:
 		if not new_node:
 			continue
 
-		# Reset the node to its defaults before applying the stored values.
 		var scr = new_node.get_script()
 		if scr and scr.can_instantiate():
 			var instance = scr.new()

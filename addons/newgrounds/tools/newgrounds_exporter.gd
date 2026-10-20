@@ -1,9 +1,6 @@
 @tool
 extends EditorExportPlugin
 
-## Injects the credentials from `.env` into the exported PCK as
-## `res://newgrounds_config.cfg`, so they never exist as a file in the project.
-
 const C = preload("res://addons/newgrounds/scripts/newgrounds_consts.gd")
 const Config = preload("res://addons/newgrounds/scripts/newgrounds_config.gd")
 

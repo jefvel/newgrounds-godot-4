@@ -18,8 +18,9 @@ func _refresh_list(medals):
 	item_list.clear()
 	var i = 0
 	for m in medals:
+		if m == null: continue;
 		var name = m.name
-		if m.unlocked:
+		if NG.medal_is_unlocked(m.id):
 			name += " (unlocked)"
 		item_list.add_item(name, m.icon)
 		item_list.set_item_tooltip(i, m.description)

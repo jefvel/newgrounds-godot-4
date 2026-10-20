@@ -26,6 +26,7 @@ signal on_signin_cancelled();
 signal on_signed_out();
 
 var medals: Dictionary = {}
+var medal_unlocks: Dictionary[int, bool] = {};
 func get_medal_resource(medal_id: int) -> MedalResource:
 	if medals.has(medal_id):
 		return medals[medal_id];
@@ -53,6 +54,7 @@ signal on_highscore_submitted(board_id: int, score: NewgroundsScoreboardItem)
 var aes = AESContext.new();
 
 const C = preload ("res://addons/newgrounds/scripts/newgrounds_consts.gd")
+const Config = preload("res://addons/newgrounds/scripts/newgrounds_config.gd")
 func _ready():
 	auto_init = ProjectSettings.get_setting(C.AUTO_INIT_PROPERTY, true);
 	
@@ -64,7 +66,7 @@ func _init_medals():
 	var medalMap = NewgroundsIds.MedalIdsToResource.medals;
 	for medal_id in medalMap.keys():
 		var medal_resource: MedalResource = load(medalMap[medal_id])
-		medal_resource.unlocked = offline_data.is_medal_unlocked(medal_id)
+		medal_unlocks[medal_id] = offline_data.is_medal_unlocked(medal_id)
 		medals[medal_id] = medal_resource;
 	pass
 
@@ -78,14 +80,14 @@ func init():
 	_load_session();
 	_init_medals();
 	
-	app_id = ProjectSettings.get_setting(C.APP_ID_PROPERTY, "")
-	aes_key = ProjectSettings.get_setting(C.AES_KEY_PROPERTY, "")
+	app_id = Config.app_id()
+	aes_key = Config.aes_key()
 	
 	var aes_bytes = Marshalls.base64_to_raw(aes_key)
 	var aes_bits = aes_bytes.size() << 3;
 	
-	assert(aes_bits == 256||aes_bits == 128, "Newgrounds AES Key Required (Assign it in the project settings)")
-	assert(app_id, "Newgrounds App ID Required (Assign it in the project settings)")
+	assert(!app_id.is_empty(), "Newgrounds App ID is missing. Set it in Project > Tools > %s, or via the %s environment variable." % [C.CONFIG_ACTION_NAME, C.ENV_APP_ID])
+	assert(aes_bits == 256 || aes_bits == 128, "Newgrounds AES key is missing or invalid. Set it in Project > Tools > %s, or via the %s environment variable." % [C.CONFIG_ACTION_NAME, C.ENV_AES_KEY])
 	
 	components.init(app_id, aes_key, session)
 	
@@ -258,23 +260,22 @@ func scoreboard_submit_time(scoreboard_id: int, milliseconds: int) -> Newgrounds
 ## Medals
 ############
 
+func medal_is_unlocked(medal_id: int):
+	if medal_unlocks.has(medal_id): return medal_unlocks[medal_id];
+	return offline_data.get_medal_unlock_state(medal_id);
+	pass
+
 ## Lists medals, emits on_medals_loaded
-func medal_get_list(app_id_override: String="") -> Array[MedalResource]:
-	var is_external = app_id_override != "" and app_id_override != app_id;
-	
-	var _app_id = app_id_override if app_id_override != "" else app_id;
-	
-	var res = await components.medal_get_list(_app_id).on_response
+func medal_get_list() -> Array[MedalResource]:
+	var res = await components.medal_get_list().on_response;
 	
 	if res.error:
-		if !is_external:
-			var converted: Array[MedalResource] = []
-			for val in medals.values():
-				if val is MedalResource:
-					converted.push_back(val)
-			return converted
-		print("Could not get external medals. Make sure the app ID is correct and allowed in your project settings.")
-		return []
+		print(res.error)
+		var converted: Array[MedalResource] = []
+		for val in medals.values():
+			if val is MedalResource:
+				converted.push_back(val)
+		return converted
 	
 	var medals_list: Array[MedalResource] = [];
 	var m = res.data;
@@ -282,37 +283,32 @@ func medal_get_list(app_id_override: String="") -> Array[MedalResource]:
 		var medal_res = get_medal_resource(medal.id)
 		if !medal_res:
 			medal_res = MedalResource.fromDict(medal);
-		else:
-			medal_res.unlocked = medal.unlocked
+		
+		medal_unlocks[medal.id] = medal.unlocked
 		
 		medals_list.push_back(medal_res)
 		
-		if is_external:
-			continue
+		medals[medal_res.id] = medal_res;
 		
-		if !is_external:
-			medals[medal_res.id] = medal_res;
-		if !medal_res.unlocked:
+		if !medal.unlocked:
 			var medal_status = offline_data.get_medal_unlock_state(medal_res.id);
 			# Medal was unlocked on newgrounds, but was then reset
 			if session.is_signed_in() and medal_status == offline_data.MedalUnlockState.UnlockedNewgrounds:
 				offline_data.set_medal_unlocked(medal_res.id, false)
 			else:
-				medal_res.unlocked = offline_data.is_medal_unlocked(medal_res.id);
+				medal_unlocks[medal_res.id] = offline_data.is_medal_unlocked(medal_res.id);
 		else:
 			offline_data.set_medal_unlocked(medal_res.id, true)
 	
-	if !is_external:
-		on_medals_loaded.emit(medals_list)
+	on_medals_loaded.emit(medals_list)
 	
 	return medals_list
 
 ## Unlocks medal. emits on_medal_unlocked on success
 func medal_unlock(medal_id: int, silent: bool=false) -> bool:
+	medal_unlocks[medal_id] = true;
+	
 	if offline_mode:
-		var medal = get_medal_resource(medal_id);
-		if medal:
-			medal.unlocked = true;
 		offline_data.add_failed_medal_unlock(medal_id)
 		if !silent:
 			on_medal_unlocked.emit(medal_id)
@@ -322,25 +318,14 @@ func medal_unlock(medal_id: int, silent: bool=false) -> bool:
 	
 	if res.error:
 		if res.error != NewgroundsRequest.ERR_MEDAL_NOT_FOUND:
-			var medal = get_medal_resource(medal_id);
-			if medal:
-				medal.unlocked = true;
 			offline_data.add_failed_medal_unlock(medal_id)
 			if !silent:
 				on_medal_unlocked.emit(medal_id)
 		return false
 	
-	offline_data.set_medal_unlocked(medal_id, true)
-	
-	var m = res.data;
-	var medal = get_medal_resource(medal_id);
-	if medal:
-		medal.unlocked = true;
-	else:
-		medal = MedalResource.fromDict(m);
-		medals[medal.id] = medal;
 	if !silent:
 		on_medal_unlocked.emit(medal_id)
+	
 	return true
 
 ## Fetch the user's total score, emitted by on_medal_score_get

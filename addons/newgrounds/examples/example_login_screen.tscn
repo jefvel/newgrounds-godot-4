@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://yjybvr6kfrvo"]
+[gd_scene format=3 uid="uid://yjybvr6kfrvo"]
 
 [ext_resource type="Script" uid="uid://2ueiminarn3y" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="1_qwmhj"]
 [ext_resource type="Script" uid="uid://cb6fe0k384kxx" path="res://addons/newgrounds/examples/sign_in_form.gd" id="3_d4y5h"]
@@ -239,7 +239,7 @@ _data = {
 &"show_login": SubResource("Animation_gx8cw")
 }
 
-[node name="ExampleSignInForm" type="Control"]
+[node name="ExampleSignInForm" type="Control" unique_id=65507963]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 3
 anchors_preset = 15
@@ -249,10 +249,10 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_d4y5h")
 
-[node name="NewgroundsSessionWatcher" type="Node" parent="."]
+[node name="NewgroundsSessionWatcher" type="Node" parent="." unique_id=1383994915]
 script = ExtResource("1_qwmhj")
 
-[node name="SignInForm" type="ColorRect" parent="."]
+[node name="SignInForm" type="ColorRect" parent="." unique_id=1233472850]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -261,7 +261,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.249526, 0.209825, 0.19624, 1)
 
-[node name="SigningInButtons" type="VBoxContainer" parent="SignInForm"]
+[node name="SigningInButtons" type="VBoxContainer" parent="SignInForm" unique_id=430884372]
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
@@ -277,16 +277,16 @@ offset_bottom = 29.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SigningInText" type="Label" parent="SignInForm/SigningInButtons"]
+[node name="SigningInText" type="Label" parent="SignInForm/SigningInButtons" unique_id=85441741]
 layout_mode = 2
 text = "Signing in..."
 horizontal_alignment = 1
 
-[node name="CancelSignIn" type="Button" parent="SignInForm/SigningInButtons"]
+[node name="CancelSignIn" type="Button" parent="SignInForm/SigningInButtons" unique_id=1434125370]
 layout_mode = 2
 text = "Cancel"
 
-[node name="SignInButtons" type="VBoxContainer" parent="SignInForm"]
+[node name="SignInButtons" type="VBoxContainer" parent="SignInForm" unique_id=92351706]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 8
@@ -301,18 +301,16 @@ offset_bottom = 33.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SignIn" type="Button" parent="SignInForm/SignInButtons"]
+[node name="SignIn" type="Button" parent="SignInForm/SignInButtons" unique_id=1400442364]
 layout_mode = 2
 text = "Sign In To Newgrounds"
 
-[node name="SkipSignIn" type="Button" parent="SignInForm/SignInButtons"]
+[node name="SkipSignIn" type="Button" parent="SignInForm/SignInButtons" unique_id=796662963]
 layout_mode = 2
 text = "Skip"
 
-[node name="Anim" type="AnimationPlayer" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_6246u")
-}
+[node name="Anim" type="AnimationPlayer" parent="." unique_id=388358255]
+libraries/ = SubResource("AnimationLibrary_6246u")
 
 [connection signal="on_not_signed_in" from="NewgroundsSessionWatcher" to="." method="_on_not_signed_in"]
 [connection signal="on_signed_in" from="NewgroundsSessionWatcher" to="." method="_on_signed_in"]

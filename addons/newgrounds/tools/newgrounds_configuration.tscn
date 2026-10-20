@@ -1,0 +1,69 @@
+[gd_scene format=3 uid="uid://bawyb42qaymav"]
+
+[ext_resource type="Script" uid="uid://e26vte71bwwq" path="res://addons/newgrounds/tools/newgrounds_configuration.gd" id="1_e8qan"]
+
+[node name="NewgroundsConfiguration" type="Control" unique_id=453426541]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_e8qan")
+
+[node name="Container" type="MarginContainer" parent="." unique_id=1027334975]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+
+[node name="Settings" type="VBoxContainer" parent="Container" unique_id=1037126008]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Container/Settings" unique_id=2092473330]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Newgrounds Setup"
+
+[node name="GridContainer" type="GridContainer" parent="Container/Settings" unique_id=1583418762]
+layout_mode = 2
+columns = 2
+
+[node name="AppIdLabel" type="Label" parent="Container/Settings/GridContainer" unique_id=994668545]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "App ID"
+
+[node name="AppId" type="LineEdit" parent="Container/Settings/GridContainer" unique_id=160300242]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+text = "55263:dOjy5fso"
+placeholder_text = "12345:abcdefg"
+
+[node name="AppSecretLabel" type="Label" parent="Container/Settings/GridContainer" unique_id=401146237]
+layout_mode = 2
+text = "AES Key"
+
+[node name="AppSecret" type="LineEdit" parent="Container/Settings/GridContainer" unique_id=1842302045]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+text = "R989EuHzWn46CC2ZanfW0A=="
+placeholder_text = "ABCABCABACB=="
+secret = true
+
+[node name="Status" type="Label" parent="Container/Settings" unique_id=1681454194]
+modulate = Color(1, 1, 1, 0.65)
+custom_minimum_size = Vector2(600, 0)
+custom_maximum_size = Vector2(600, -1)
+propagate_maximum_size = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.65)
+text = "Stored in res://.env. That file is gitignored and copied into the exported game."
+autowrap_mode = 3

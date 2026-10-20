@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://xcwcga3on6gp"]
+[gd_scene format=3 uid="uid://xcwcga3on6gp"]
 
 [ext_resource type="Script" uid="uid://btrvhxpx86k87" path="res://addons/newgrounds/examples/newgrounds_debug.gd" id="1_e2xbo"]
 [ext_resource type="Script" uid="uid://ixpyi3twpto4" path="res://addons/newgrounds/examples/ExampleSaveData.gd" id="2_5kj3a"]
@@ -9,7 +9,7 @@
 [ext_resource type="Script" uid="uid://dxu5nxiql0qyj" path="res://addons/newgrounds/newgrounds_medal_unlocker.gd" id="7_tu0rn"]
 [ext_resource type="PackedScene" uid="uid://yjybvr6kfrvo" path="res://addons/newgrounds/examples/example_login_screen.tscn" id="8_jot3l"]
 
-[node name="NewgroundsDebugExamples" type="Control"]
+[node name="NewgroundsDebugExamples" type="Control" unique_id=1155036265]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -18,7 +18,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_e2xbo")
 
-[node name="ExampleSaveData" type="Control" parent="." groups=["CloudSave"]]
+[node name="ExampleSaveData" type="Control" parent="." unique_id=1692100743 groups=["CloudSave"]]
 anchors_preset = 0
 offset_left = 34.0
 offset_top = 448.0
@@ -26,7 +26,7 @@ offset_right = 34.0
 offset_bottom = 448.0
 script = ExtResource("2_5kj3a")
 
-[node name="TextEdit" type="TextEdit" parent="ExampleSaveData"]
+[node name="TextEdit" type="TextEdit" parent="ExampleSaveData" unique_id=2091354568]
 layout_mode = 0
 offset_left = -4.0
 offset_top = -7.0
@@ -34,7 +34,7 @@ offset_right = 269.0
 offset_bottom = 172.0
 placeholder_text = "Example save data"
 
-[node name="Log In" type="Button" parent="."]
+[node name="Log In" type="Button" parent="." unique_id=468517500]
 layout_mode = 1
 offset_left = 30.0
 offset_top = 25.0
@@ -42,7 +42,7 @@ offset_right = 170.0
 offset_bottom = 56.0
 text = "Log in"
 
-[node name="Check Session" type="Button" parent="."]
+[node name="Check Session" type="Button" parent="." unique_id=1848150980]
 layout_mode = 1
 offset_left = 30.0
 offset_top = 64.0
@@ -50,7 +50,7 @@ offset_right = 170.0
 offset_bottom = 95.0
 text = "Check session"
 
-[node name="List Medals" type="Button" parent="."]
+[node name="List Medals" type="Button" parent="." unique_id=733852445]
 layout_mode = 1
 offset_left = 30.0
 offset_top = 103.0
@@ -58,7 +58,7 @@ offset_right = 170.0
 offset_bottom = 134.0
 text = "List Medals"
 
-[node name="List Medals2" type="Button" parent="."]
+[node name="List Medals2" type="Button" parent="." unique_id=51797735]
 layout_mode = 1
 offset_left = 178.0
 offset_top = 103.0
@@ -66,7 +66,7 @@ offset_right = 318.0
 offset_bottom = 134.0
 text = "Unlock Medal"
 
-[node name="List Scoreboards" type="Button" parent="."]
+[node name="List Scoreboards" type="Button" parent="." unique_id=88112792]
 layout_mode = 1
 offset_left = 30.0
 offset_top = 142.0
@@ -74,7 +74,7 @@ offset_right = 170.0
 offset_bottom = 173.0
 text = "List Scoreboards"
 
-[node name="Submit Score" type="Button" parent="."]
+[node name="Submit Score" type="Button" parent="." unique_id=119510709]
 layout_mode = 1
 offset_left = 30.0
 offset_top = 181.0
@@ -82,7 +82,7 @@ offset_right = 170.0
 offset_bottom = 212.0
 text = "Post Score"
 
-[node name="Load Saveslots" type="Button" parent="."]
+[node name="Load Saveslots" type="Button" parent="." unique_id=881068956]
 layout_mode = 1
 offset_left = 30.0
 offset_top = 282.0
@@ -90,7 +90,7 @@ offset_right = 170.0
 offset_bottom = 313.0
 text = "Load Saveslots"
 
-[node name="Save Slot" type="Button" parent="."]
+[node name="Save Slot" type="Button" parent="." unique_id=1198034387]
 layout_mode = 1
 offset_left = 30.0
 offset_top = 361.0
@@ -98,7 +98,7 @@ offset_right = 170.0
 offset_bottom = 392.0
 text = "Save Slot 1 Data"
 
-[node name="Get Slot Data" type="Button" parent="."]
+[node name="Get Slot Data" type="Button" parent="." unique_id=1854564710]
 layout_mode = 1
 offset_left = 30.0
 offset_top = 321.0
@@ -107,7 +107,7 @@ offset_bottom = 352.0
 text = "Load Slot 1 Data
 "
 
-[node name="Clear Slot" type="Button" parent="."]
+[node name="Clear Slot" type="Button" parent="." unique_id=1835708257]
 layout_mode = 1
 offset_left = 30.0
 offset_top = 401.0
@@ -115,7 +115,7 @@ offset_right = 170.0
 offset_bottom = 432.0
 text = "Clear Slot 1 Data"
 
-[node name="Profile" type="Button" parent="."]
+[node name="Profile" type="Button" parent="." unique_id=1453232380]
 layout_mode = 0
 offset_left = 191.0
 offset_top = 25.0
@@ -125,7 +125,7 @@ tooltip_text = "Open Profile URL"
 mouse_default_cursor_shape = 2
 flat = true
 
-[node name="NewgroundsUserAvatar" parent="Profile" instance=ExtResource("3_vopvl")]
+[node name="NewgroundsUserAvatar" parent="Profile" unique_id=1318968612 instance=ExtResource("3_vopvl")]
 layout_mode = 1
 anchors_preset = 9
 anchor_right = 0.0
@@ -134,7 +134,7 @@ offset_right = 60.0
 offset_bottom = 0.0
 grow_horizontal = 1
 
-[node name="UserName" type="Label" parent="Profile"]
+[node name="UserName" type="Label" parent="Profile" unique_id=431471602]
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
@@ -148,7 +148,7 @@ grow_vertical = 2
 text = "asdf"
 vertical_alignment = 1
 
-[node name="UserMedalScore" type="Label" parent="Profile"]
+[node name="UserMedalScore" type="Label" parent="Profile" unique_id=1495002677]
 layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
@@ -163,26 +163,27 @@ theme_override_colors/font_color = Color(0.905882, 0.670588, 0.145098, 1)
 text = "19 033 P"
 vertical_alignment = 1
 
-[node name="ExampleScoreboard" parent="." instance=ExtResource("3_gp5e1")]
+[node name="ExampleScoreboard" parent="." unique_id=1799534740 instance=ExtResource("3_gp5e1")]
 layout_mode = 0
 offset_left = 422.0
 offset_top = 57.0
 offset_right = 688.0
 offset_bottom = 422.0
 
-[node name="ExampleMedalList" parent="." instance=ExtResource("4_lqp0p")]
+[node name="ExampleMedalList" parent="." unique_id=974523646 instance=ExtResource("4_lqp0p")]
+layout_mode = 0
 offset_left = 885.0
 offset_top = 40.0
 offset_right = 1111.0
 offset_bottom = 405.0
 
-[node name="NewgroundsSessionWatcher" type="Node" parent="."]
+[node name="NewgroundsSessionWatcher" type="Node" parent="." unique_id=626471515]
 script = ExtResource("6_i37bs")
 
-[node name="NewgroundsMedalUnlocker" type="Node" parent="."]
+[node name="NewgroundsMedalUnlocker" type="Node" parent="." unique_id=1145424218]
 script = ExtResource("7_tu0rn")
 
-[node name="ExampleSignInForm" parent="." instance=ExtResource("8_jot3l")]
+[node name="ExampleSignInForm" parent="." unique_id=1634396339 instance=ExtResource("8_jot3l")]
 layout_mode = 1
 
 [connection signal="text_changed" from="ExampleSaveData/TextEdit" to="ExampleSaveData" method="_on_text_edit_text_changed"]

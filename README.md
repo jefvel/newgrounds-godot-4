@@ -2,10 +2,22 @@
 
 ## Quick start
 
-Install and enable the addon. Go to the project settings and look for `Newgrounds.io`.
-In there, add the app ID and encryption key found on the Newgrounds project page.
+Install and enable the addon. Then set your app ID and encryption key found on the
+Newgrounds project page. You can do this in **Project Settings > Newgrounds**, which
+writes them to a gitignored `.env` file at the project root. The same panel is also
+available from **Project > Tools > Configure Newgrounds App ID and AES Key**:
 
-![Configure the addon](/images/project_settings.png)
+```sh
+# .env
+NEWGROUNDS_APP_ID=123456
+NEWGROUNDS_AES_KEY=your-base64-aes-key
+```
+
+You can also copy `.env.example` and edit it by hand, or set the same variables in your
+CI environment. On export, the addon embeds them into the game automatically.
+
+The credentials are deliberately not stored in `ProjectSettings`, so they cannot end up
+in `project.godot`. Add `.env` to your `.gitignore` (this repository already does).
 
 You should also import your medals/scoreboards from Newgrounds:
 
@@ -13,6 +25,29 @@ You should also import your medals/scoreboards from Newgrounds:
 This will make it possible to get medal/scoreboard names using `NewgroundsIds.ScoreboardId` and `NewgroundsIds.MedalId`.
 
 Once done, you are ready to go! The nodes `NG` and `NGCloudSave` are accessible in code.
+
+### How the credentials are resolved
+
+At runtime the addon looks for the values in this order:
+
+1. `res://.env` — used in the editor and when running from source.
+2. `res://newgrounds_config.cfg` — injected into the PCK by the export plugin. This
+   file never exists on disk, so there is nothing to commit or `.gitignore`.
+3. The `NEWGROUNDS_APP_ID` / `NEWGROUNDS_AES_KEY` environment variables — handy for CI.
+
+In CI, export the secrets as environment variables before building:
+
+```sh
+NEWGROUNDS_APP_ID=123456 NEWGROUNDS_AES_KEY=... godot --headless --export-release "Web" build/index.html
+```
+
+Because the key has to be readable by the client, this is obfuscation rather than real
+secrecy: anyone can extract it from the `.pck`. Keep the key revocable and don't use it
+for anything that matters on its own.
+
+Don't add `.env` to the export preset's non-resource filters (`*`, `.env`, ...): the value
+is already injected by the addon, and a matching filter would ship the file in plaintext
+as well.
 
 ### Signing in & out
 

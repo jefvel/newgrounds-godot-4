@@ -17,7 +17,6 @@ enum Difficulty {
 @export var id: int;
 @export var secret: bool;
 
-@export var unlocked: bool;
 @export var value: int;
 
 @export var difficulty: Difficulty;
@@ -47,6 +46,5 @@ static func load_from_dict(m: MedalResource, d: Dictionary):
 	m.icon_url = d.icon
 	m.id = d.id
 	m.secret = d.secret
-	m.unlocked = d.unlocked
 	m.value = d.value;
 	m.difficulty = d.difficulty

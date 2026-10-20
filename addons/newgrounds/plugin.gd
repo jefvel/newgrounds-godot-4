@@ -2,14 +2,27 @@
 extends EditorPlugin
 
 const C = preload("res://addons/newgrounds/scripts/newgrounds_consts.gd")
+const DotEnv = preload("res://addons/newgrounds/scripts/newgrounds_dotenv.gd")
+const Exporter = preload("res://addons/newgrounds/tools/newgrounds_exporter.gd")
+const Config = preload("res://addons/newgrounds/scripts/newgrounds_config.gd")
+
+var _exporter: EditorExportPlugin
+var _project_settings_tab: Control
+
 func _enter_tree():
-	add_project_setting(C.APP_ID_PROPERTY, "", TYPE_STRING)
-	add_project_setting(C.AES_KEY_PROPERTY, "", TYPE_STRING)
+	_migrate_legacy_credentials()
+
 	add_project_setting(C.AUTO_INIT_PROPERTY, true, TYPE_BOOL)
 	add_project_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY, C.MEDALS_PATH, TYPE_STRING, PROPERTY_HINT_DIR, "", false)
 	
+	_exporter = Exporter.new()
+	add_export_plugin(_exporter)
+	
 	add_tool_menu_item(C.IMPORT_ACTION_NAME, _import_newgrounds)
 	add_tool_menu_item(C.OPEN_NEWGROUNDS_HELP, _open_docs)
+
+	_add_project_settings_tab()
+
 	
 	ProjectSettings.set_setting("global_group/CloudSave", "Newgrounds Cloudsave")
 
@@ -36,9 +49,50 @@ func _open_docs():
 func _exit_tree():
 	remove_autoload_singleton(C.NEWGROUNDS_AUTOLOAD_NAME)
 	remove_autoload_singleton(C.CLOUDSAVE_AUTOLOAD_NAME)
+	remove_tool_menu_item(C.CONFIG_ACTION_NAME)
 	remove_tool_menu_item(C.IMPORT_ACTION_NAME)
 	remove_tool_menu_item(C.OPEN_NEWGROUNDS_HELP)
+	if is_instance_valid(_project_settings_tab):
+		remove_control_from_container(CONTAINER_PROJECT_SETTING_TAB_RIGHT, _project_settings_tab)
+		_project_settings_tab.queue_free()
+		_project_settings_tab = null
+	if is_instance_valid(_exporter):
+		remove_export_plugin(_exporter)
+		_exporter = null
 	pass
+
+func _add_project_settings_tab() -> void:
+	_project_settings_tab = preload(C.CONFIG_SCENE).instantiate()
+	_project_settings_tab.name = "NewgroundsIO"
+	add_control_to_container(CONTAINER_PROJECT_SETTING_TAB_RIGHT, _project_settings_tab)
+
+## Moves app ID / AES key out of ProjectSettings (and therefore project.godot)
+## into the gitignored `.env`.
+func _migrate_legacy_credentials() -> void:
+	var legacy := {}
+	for pair in [[C.ENV_APP_ID, C.APP_ID_PROPERTY], [C.ENV_AES_KEY, C.AES_KEY_PROPERTY]]:
+		var value := str(ProjectSettings.get_setting(pair[1], "")).strip_edges()
+		if not value.is_empty():
+			legacy[pair[0]] = value
+
+	if legacy.is_empty():
+		return
+
+	var stored := DotEnv.load_file(C.ENV_FILE)
+	var updates := {}
+	for key in legacy:
+		if str(stored.get(key, "")).strip_edges().is_empty():
+			updates[key] = legacy[key]
+
+	if not updates.is_empty():
+		DotEnv.save_values(C.ENV_FILE, updates)
+
+	for property in [C.APP_ID_PROPERTY, C.AES_KEY_PROPERTY]:
+		ProjectSettings.clear(property)
+	ProjectSettings.save()
+	Config.reload()
+	print("Newgrounds: moved the App ID and AES key from ProjectSettings to %s. Add .env to your .gitignore." % C.ENV_FILE)
+
 
 var loadedMedals = false;
 var medalList:Array[MedalResource] = [];
@@ -53,10 +107,10 @@ func _import_newgrounds():
 	medalList = [];
 	scoreboardList = [];
 	
-	var app_id = ProjectSettings.get_setting(C.APP_ID_PROPERTY, "")
-	var aes_key = ProjectSettings.get_setting(C.AES_KEY_PROPERTY, "")
-	assert(app_id, "App ID not provided, configure it in the project settings")
-	assert(aes_key, "AES key not provided, configure it in the project settings")
+	var app_id = Config.app_id()
+	var aes_key = Config.aes_key()
+	assert(!app_id.is_empty(), "App ID not provided, configure it in Project > Tools > %s" % C.CONFIG_ACTION_NAME)
+	assert(!aes_key.is_empty(), "AES key not provided, configure it in Project > Tools > %s" % C.CONFIG_ACTION_NAME)
 	
 	if boardRequest and is_instance_valid(boardRequest):
 		boardRequest.cancel()
@@ -134,7 +188,10 @@ func medals_get(res: NewgroundsResponse):
 		var imgReq = NewgroundsImage.new()
 		imgReq.visible = false;
 		add_child(imgReq)
-		imgReq.url = medal.icon_url;
+		var icon_url = medal.icon_url;
+		if !icon_url.begins_with("https:"):
+			icon_url = "https:" + icon_url;
+		imgReq.url = icon_url;
 		imgReq.on_image_loaded.connect(_set_medal_icon.bind(medal, resource_name, imgReq))
 		
 	loadedMedals = true

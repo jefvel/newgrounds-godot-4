@@ -47,7 +47,7 @@ func _on_check_session_pressed():
 func _on_check_session_2_pressed():
 	var r = await NG.medal_get_list()
 	for m in r:
-		print("%s - unlocked: %s" % [m.name, m.unlocked])
+		print("%s - unlocked: %s" % [m.name, NG.medal_is_unlocked(m.id)])
 	refresh_medal_score()
 	pass # Replace with function body.
 

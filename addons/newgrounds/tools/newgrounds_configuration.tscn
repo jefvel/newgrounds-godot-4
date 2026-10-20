@@ -86,7 +86,6 @@ theme_override_constants/separation = -6
 
 [node name="AutoInit" type="CheckBox" parent="Container/Settings/VBoxContainer" unique_id=1552363290]
 layout_mode = 2
-accessibility_labeled_by_nodes = Array[NodePath]([NodePath("")])
 button_pressed = true
 text = "Auto init "
 
@@ -122,22 +121,24 @@ layout_mode = 2
 layout_mode = 2
 text = "Medal & Leaderboard Import"
 
-[node name="VBoxContainer" type="HBoxContainer" parent="Container/Settings/VBoxContainer2" unique_id=1130095387]
+[node name="Buttons" type="HBoxContainer" parent="Container/Settings/VBoxContainer2" unique_id=1130095387]
 layout_mode = 2
 
-[node name="ImportFromNewgrounds" type="Button" parent="Container/Settings/VBoxContainer2/VBoxContainer" unique_id=338671543]
+[node name="ImportFromNewgrounds" type="Button" parent="Container/Settings/VBoxContainer2/Buttons" unique_id=338671543]
 layout_mode = 2
 size_flags_horizontal = 0
 text = "Import"
 
-[node name="Reload Project" type="Button" parent="Container/Settings/VBoxContainer2/VBoxContainer" unique_id=1183157092]
+[node name="Reload Project" type="Button" parent="Container/Settings/VBoxContainer2/Buttons" unique_id=1183157092]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 0
 text = "Reload project"
 
 [node name="ImportResult" type="Label" parent="Container/Settings/VBoxContainer2" unique_id=1840581243]
+custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
+autowrap_mode = 3
 
 [node name="Docs" type="LinkButton" parent="Container/Settings" unique_id=39152325]
 layout_mode = 2

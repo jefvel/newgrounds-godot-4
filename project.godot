@@ -39,6 +39,7 @@ CloudSave="Newgrounds Cloudsave"
 [newgrounds.io]
 
 opened_getting_started_page=false
+last_ids_file_path="res://imported_newgrounds_medals/newgrounds_ids.gd"
 
 [rendering]
 

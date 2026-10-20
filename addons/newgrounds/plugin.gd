@@ -22,9 +22,12 @@ func _enter_tree():
 
 	_add_project_settings_tab()
 
-	ProjectSettings.set_setting("global_group/CloudSave", "Newgrounds Cloudsave")
+	if not ProjectSettings.has_setting("global_group/CloudSave"):
+		ProjectSettings.set_setting("global_group/CloudSave", "Newgrounds Cloudsave")
 
-	if !FileAccess.file_exists(C.IDS_FILE_PATH):
+	_migrate_ids_file()
+
+	if !FileAccess.file_exists(_get_ids_path()):
 		_write_template_file([], [])
 
 	if !ProjectSettings.has_setting("autoload/%s" % C.NEWGROUNDS_AUTOLOAD_NAME):
@@ -53,12 +56,106 @@ func _add_project_settings_tab() -> void:
 	add_control_to_container(CONTAINER_PROJECT_SETTING_TAB_RIGHT, _project_settings_tab)
 	if _project_settings_tab.has_signal("import_requested"):
 		_project_settings_tab.connect("import_requested", _import_newgrounds)
+	if _project_settings_tab.has_signal("medals_dir_changed"):
+		_project_settings_tab.connect("medals_dir_changed", _on_medals_dir_changed)
 	if not import_finished.is_connected(_on_import_finished):
 		import_finished.connect(_on_import_finished)
+
+func _on_medals_dir_changed(old_dir: String, _new_dir: String) -> void:
+	var ids_path := _get_ids_path()
+	var previous_path := str(ProjectSettings.get_setting(C.LAST_IDS_PATH_PROPERTY, ""))
+	if previous_path.is_empty():
+		previous_path = _ids_path_for_dir(old_dir)
+
+	var moved := _move_ids_file(previous_path, ids_path)
+	moved = _move_ids_file(C.LEGACY_IDS_FILE_PATH, ids_path) or moved
+
+	ProjectSettings.set_setting(C.LAST_IDS_PATH_PROPERTY, ids_path)
+	ProjectSettings.set_as_internal(C.LAST_IDS_PATH_PROPERTY, true)
+	ProjectSettings.save()
+
+	if moved and is_instance_valid(_project_settings_tab):
+		_project_settings_tab.call("show_import_result", true, "Moved the Newgrounds IDs file to %s. Reload the project to apply the change." % ids_path)
 
 func _on_import_finished(success: bool, message: String) -> void:
 	if is_instance_valid(_project_settings_tab):
 		_project_settings_tab.call("show_import_result", success, message)
+
+## Directory the generated medal resources and IDs file are written to.
+func _get_medals_dir() -> String:
+	var dir := str(ProjectSettings.get_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY, C.MEDALS_PATH)).strip_edges().replace("\\", "/")
+	if dir.is_empty():
+		dir = C.MEDALS_PATH
+	if dir.ends_with("/") and dir != "res://" and dir != "user://":
+		dir = dir.substr(0, dir.length() - 1)
+	return dir
+
+func _get_ids_path() -> String:
+	return _ids_path_for_dir(_get_medals_dir())
+
+func _ids_path_for_dir(dir: String) -> String:
+	var normalized := dir.strip_edges().replace("\\", "/")
+	if normalized.ends_with("/"):
+		return normalized + C.IDS_FILE_NAME
+	return normalized + "/" + C.IDS_FILE_NAME
+
+## Moves the generated IDs file out of its old location so there is only one
+## `NewgroundsIds` class in the project.
+func _migrate_ids_file() -> void:
+	var ids_path := _get_ids_path()
+	var previous_path := str(ProjectSettings.get_setting(C.LAST_IDS_PATH_PROPERTY, ""))
+	if not previous_path.is_empty() and previous_path != ids_path:
+		_move_ids_file(previous_path, ids_path)
+	_move_ids_file(C.LEGACY_IDS_FILE_PATH, ids_path)
+
+	ProjectSettings.set_setting(C.LAST_IDS_PATH_PROPERTY, ids_path)
+	ProjectSettings.set_as_internal(C.LAST_IDS_PATH_PROPERTY, true)
+
+## Returns true if the file was moved or a stale copy was removed.
+func _move_ids_file(from_path: String, to_path: String) -> bool:
+	if from_path.is_empty() or from_path == to_path:
+		return false
+	if not FileAccess.file_exists(from_path):
+		return false
+
+	if not FileAccess.file_exists(to_path):
+		var dir_error := DirAccess.make_dir_recursive_absolute(to_path.get_base_dir())
+		if dir_error != OK:
+			push_error("Newgrounds: could not create %s (%s)." % [to_path.get_base_dir(), error_string(dir_error)])
+			return false
+
+		var contents := FileAccess.get_file_as_string(from_path)
+		if contents.is_empty():
+			push_error("Newgrounds: could not read %s." % from_path)
+			return false
+
+		var file := FileAccess.open(to_path, FileAccess.WRITE)
+		if file == null:
+			push_error("Newgrounds: could not move %s to %s (%s)." % [from_path, to_path, error_string(FileAccess.get_open_error())])
+			return false
+		file.store_string(contents)
+		file.close()
+
+	DirAccess.remove_absolute(from_path)
+
+	var fs := get_editor_interface().get_resource_filesystem()
+	fs.update_file(from_path)
+	fs.update_file(to_path)
+	print("Newgrounds: moved %s to %s." % [from_path, to_path])
+	return true
+
+## Existing medal id -> resource path mapping, if the generated file is present.
+func _get_existing_medal_resources() -> Dictionary:
+	var ids_path := _get_ids_path()
+	if not ResourceLoader.exists(ids_path):
+		return {}
+	var ids_script = load(ids_path)
+	if ids_script == null:
+		return {}
+	var ids_class = ids_script.MedalIdsToResource
+	if ids_class and ids_class.medals is Dictionary:
+		return ids_class.medals
+	return {}
 
 
 func _migrate_legacy_credentials() -> void:
@@ -105,7 +202,7 @@ func _import_newgrounds():
 	var app_id = Config.app_id()
 	var aes_key = Config.aes_key()
 	if app_id.is_empty() or aes_key.is_empty():
-		var message := "Add the App ID and AES key on the NewgroundsIO tab (or in %s) before importing." % C.ENV_FILE
+		var message := "Add the App ID and AES key on the Newgrounds tab (Project Settings > Newgrounds) or in %s before importing." % C.ENV_FILE
 		printerr("Newgrounds.io - " + message)
 		_finish_import(false, message)
 		return
@@ -141,6 +238,8 @@ func _finish_import(success: bool, message: String) -> void:
 
 func scoreboards_get(res:NewgroundsResponse):
 	if (res.error):
+		if res.error == NewgroundsRequest.ERR_CANCELLED:
+			return
 		var message := "Could not get scoreboards: %s" % res.error_message
 		printerr(message)
 		_finish_import(false, message)
@@ -154,6 +253,8 @@ const NewgroundsImage = preload("res://addons/newgrounds/scripts/newgrounds_imag
 
 func medals_get(res: NewgroundsResponse):
 	if (res.error):
+		if res.error == NewgroundsRequest.ERR_CANCELLED:
+			return
 		var message := "Could not get medals: %s" % res.error_message
 		printerr(message)
 		_finish_import(false, message)
@@ -171,8 +272,8 @@ func medals_get(res: NewgroundsResponse):
 			return
 
 	var used_names = {}
-	const medal_names = preload("res://addons/newgrounds/data/newgrounds_ids.gd").MedalIdsToResource.medals
-	const not_allowed = [':',"'",'/,','\\','?','*','"','|', '%','<','>']
+	var medal_names := _get_existing_medal_resources()
+	const not_allowed = [':',"'",'/','\\','?','*','"','|', '%','<','>']
 	for m in data.medals:
 		var medal_name: String = m.name.to_snake_case();
 		for c in not_allowed:
@@ -265,14 +366,27 @@ func _write_template_file(scoreboardList, medalList):
 		medalString += "	%s = %s,\n" % [medal_name, int(m.id)]
 
 	var f = FileAccess.get_file_as_string(C.NEWGROUNDS_IDS_TEMPLATE)
+	if f.is_empty():
+		push_error("Newgrounds: could not read %s." % C.NEWGROUNDS_IDS_TEMPLATE)
+		return
+
+	var ids_path := _get_ids_path()
+	var dir_error := DirAccess.make_dir_recursive_absolute(ids_path.get_base_dir())
+	if dir_error != OK:
+		push_error("Newgrounds: could not create %s (%s)." % [ids_path.get_base_dir(), error_string(dir_error)])
+		return
+
 	var s = f % [boardString, medalString, medalResource]
-	var file = FileAccess.open(C.IDS_FILE_PATH, FileAccess.WRITE)
+	var file = FileAccess.open(ids_path, FileAccess.WRITE)
+	if file == null:
+		push_error("Newgrounds: could not write %s (%s)." % [ids_path, error_string(FileAccess.get_open_error())])
+		return
 	file.store_string(s)
 	file.close();
 
 	var interface = get_editor_interface()
 	var fs = interface.get_resource_filesystem()
-	fs.update_file(C.IDS_FILE_PATH);
+	fs.update_file(ids_path);
 
 func add_project_setting(name: String, default_value, type: int, hint: int = PROPERTY_HINT_NONE, hint_string: String = "", basic: bool = true) -> void:
 
@@ -289,8 +403,3 @@ func add_project_setting(name: String, default_value, type: int, hint: int = PRO
 	ProjectSettings.add_property_info(setting_info)
 	ProjectSettings.set_initial_value(name, default_value)
 	ProjectSettings.set_as_basic(name, basic)
-
-
-func remove_project_setting(name: String):
-	ProjectSettings.clear(name)
-	pass

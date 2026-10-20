@@ -8,10 +8,6 @@ enum MedalUnlockState {
 	UnlockedNewgrounds,
 }
 
-# When anonymous, _user_id is 0.
-# Once logged in, it'll change. 
-var _user_id = 0;
-
 var _medal_unlocks = {};
 var _failed_highscore_posts = {};
 
@@ -31,10 +27,10 @@ func is_medal_unlocked(medal_id:int):
 	var has_value = _medal_unlocks.has(str(medal_id)) 
 	return has_value and _medal_unlocks[str(medal_id)] != MedalUnlockState.Locked
 
-func get_medal_unlock_state(medal_id: int):
+func get_medal_unlock_state(medal_id: int) -> MedalUnlockState:
 	if !_medal_unlocks.has(str(medal_id)):
-		return 0;
-	return _medal_unlocks[str(medal_id)]
+		return MedalUnlockState.Locked
+	return int(_medal_unlocks[str(medal_id)])
 	
 func add_failed_scoreboard_post(scoreboard_id: int, score: int):
 	var str_key = str(scoreboard_id)
@@ -100,16 +96,16 @@ func retry_sending_medals_and_highscores():
 	for medal_id in _medal_unlocks.keys():
 		var medal_status = _medal_unlocks[medal_id];
 		if medal_status == MedalUnlockState.UnlockedLocal:
-			NG.medal_unlock(int(medal_id), true)
+			await NG.medal_unlock(int(medal_id), true)
 	
 	var scrs = _failed_highscore_posts
 	_failed_highscore_posts = {};
 	for scoreboard_id_str in scrs.keys():
 		var post = scrs[scoreboard_id_str]
 		var scoreboard_id = int(scoreboard_id_str)
-		NG.scoreboard_submit(scoreboard_id, post.max)
+		await NG.scoreboard_submit(scoreboard_id, post.max)
 		if (post.min != post.max):
-			NG.scoreboard_submit(scoreboard_id, post.min)
+			await NG.scoreboard_submit(scoreboard_id, post.min)
 	save();
 	
 	sync_save_slots()
@@ -129,38 +125,47 @@ func sync_save_slots():
 	pass
 
 func save():
-	var s = FileAccess.open(OFFLINE_FILE_NAME, FileAccess.WRITE);
+	var file = FileAccess.open(OFFLINE_FILE_NAME, FileAccess.WRITE);
+	if file == null:
+		push_error("Newgrounds: could not save offline data (%s)." % error_string(FileAccess.get_open_error()))
+		return
+
 	var data = {
 		"_medal_unlocks": _medal_unlocks,
 		"_failed_highscore_posts": _failed_highscore_posts,
 		"_save_slots": _save_slots
 	}
-	
+
 	var jsondata = JSON.stringify(data)
 
 	var d = hash_string(jsondata)
-	
-	s.store_line(d)
-	s.close()
-	
+
+	file.store_line(d)
+	file.close()
+
 func load():
 	if !FileAccess.file_exists(OFFLINE_FILE_NAME):
 		return
-	var save_game = FileAccess.open(OFFLINE_FILE_NAME, FileAccess.READ);
-	while save_game.get_position() < save_game.get_length():
-		var json_string = unhash_string(save_game.get_line())
 
-		# Creates the helper class to interact with JSON
-		var json = JSON.new()
+	var file = FileAccess.open(OFFLINE_FILE_NAME, FileAccess.READ);
+	if file == null:
+		push_error("Newgrounds: could not load offline data (%s)." % error_string(FileAccess.get_open_error()))
+		return
 
-		# Check if there is any error while parsing the JSON string, skip in case of failure
-		var parse_result = json.parse(json_string)
-		if not parse_result == OK:
-			print("JSON Parse Error: ", json.get_error_message(), " in ", json_string, " at line ", json.get_error_line())
+	while file.get_position() < file.get_length():
+		var json_string = unhash_string(file.get_line())
+		if json_string.is_empty():
 			continue
-		
-		# Get the data from the JSON object
+
+		var json = JSON.new()
+		if json.parse(json_string) != OK:
+			push_warning("Newgrounds: offline data JSON parse error: %s" % json.get_error_message())
+			continue
+
 		var node_data = json.get_data()
+		if not (node_data is Dictionary):
+			continue
+
 		for i in node_data.keys():
 			var value = node_data[i]
 			if i == "_failed_highscore_posts" and value is Array:
@@ -168,4 +173,7 @@ func load():
 				for p in value:
 					add_failed_scoreboard_post(p.id, p.value)
 				continue
-			set(i, value)
+			if i == "_medal_unlocks" or i == "_save_slots":
+				set(i, value)
+
+	file.close()

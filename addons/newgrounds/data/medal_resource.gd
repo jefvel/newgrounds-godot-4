@@ -41,10 +41,10 @@ static func fromDict(d: Dictionary):
 	return m
 
 static func load_from_dict(m: MedalResource, d: Dictionary):
-	m.description = d.description
-	m.name = d.name
-	m.icon_url = d.icon
-	m.id = d.id
-	m.secret = d.secret
-	m.value = d.value;
-	m.difficulty = d.difficulty
+	m.description = str(d.get("description", ""))
+	m.name = str(d.get("name", ""))
+	m.icon_url = str(d.get("icon", ""))
+	m.id = int(d.get("id", 0))
+	m.secret = bool(d.get("secret", false))
+	m.value = int(d.get("value", 0));
+	m.difficulty = int(d.get("difficulty", 0))

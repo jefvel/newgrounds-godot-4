@@ -10,9 +10,6 @@ func _ready():
 func on_saves_synced():
 	print("Saves have been synced")
 
-func test():
-	pass
-
 @onready var user_name = $Profile/UserName
 @onready var user_medal_score = $Profile/UserMedalScore
 

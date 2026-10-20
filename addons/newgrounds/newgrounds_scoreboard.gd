@@ -35,6 +35,8 @@ func _set_period(p):
 @export var social: bool = false : set = _set_social;
 func _set_social(s):
 	social = s;
+	page = 0;
+	reached_end = false;
 	_test_refresh()
 
 ## Fetch only personal scores
@@ -49,8 +51,23 @@ func _set_own_scores(o):
 
 var page: int = 0;
 
-var score_tag: String;
-var user: String;
+var score_tag: String = "":
+	set(value):
+		if score_tag == value:
+			return
+		score_tag = value
+		page = 0
+		reached_end = false
+		_test_refresh()
+
+var user: String = "":
+	set(value):
+		if user == value:
+			return
+		user = value
+		page = 0
+		reached_end = false
+		_test_refresh()
 
 var reached_end: bool = false;
 
@@ -103,26 +120,27 @@ func previous_page():
 
 var req: NewgroundsRequest
 func refresh():
-	refreshing = true;
 	var period = _getPeriod()
 	var skip = page_size * page;
 	var limit = page_size;
 	var _usr = user;
-	if (req && is_instance_valid(req)):
+	if req && is_instance_valid(req):
 		req.cancel()
+		req = null
 	if own_scores:
 		if NG.session.user:
 			_usr = NG.session.user.name;
 		else:
 			scores = [];
 			refreshing = false;
+			on_scores_get.emit(scores);
 			return;
 	req = NG.components.scoreboard_get_scores(scoreboard_id, limit, skip, period, social, _usr, score_tag)
 	req.on_success.connect(_score_get);
 	req.on_error.connect(_get_failure)
-	pass
+	refreshing = true;
 
-func _get_failure(error):
+func _get_failure(_error):
 	refreshing = false;
 
 func _score_get(new_scores):
@@ -130,15 +148,18 @@ func _score_get(new_scores):
 	var index = page * page_size + 1;
 	var score_count = new_scores.size()
 	
-	if score_count < page_size:
-		reached_end = true;
-		if score_count == 0:
-			if page > 0:
-				page -= 1;
-			else:
-				scores = []
+	if score_count == 0:
+		if page > 0:
+			page -= 1;
+			reached_end = false;
+			refresh();
+		else:
+			scores = [];
+			reached_end = true;
 			on_scores_get.emit(scores);
-			return;
+		return;
+
+	reached_end = score_count < page_size;
 	
 	scores = [];
 	for score in new_scores:
@@ -150,7 +171,7 @@ func _score_get(new_scores):
 	on_scores_get.emit(scores);
 	pass
 
-func _getPeriod():
+func _getPeriod() -> String:
 	match scoreboard_period:
 		ScoreboardPeriod.Day:
 			return "D"

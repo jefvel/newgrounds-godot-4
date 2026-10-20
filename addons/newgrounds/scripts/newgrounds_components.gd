@@ -5,7 +5,7 @@ var aes_key: String
 var app_id: String
 
 var aes = AESContext.new();
-var session: NewgroundsSession;
+var session: NewgroundsSession = null;
 
 func init(app_id: String, aes_key: String, session: NewgroundsSession):
 	self.app_id = app_id

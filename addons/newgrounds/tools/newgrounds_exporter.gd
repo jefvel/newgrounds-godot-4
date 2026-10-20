@@ -18,7 +18,7 @@ func _export_begin(_features: PackedStringArray, _is_debug: bool, _path: String,
 	if app_id.is_empty() or aes_key.is_empty():
 		push_error(
 			"Newgrounds: App ID and/or AES key are missing, exporting without credentials. " +
-			"Set them in Project > Tools > %s, or via %s / %s environment variables." %
+			"Set them in %s, or via %s / %s environment variables." %
 			[C.CONFIG_ACTION_NAME, C.ENV_APP_ID, C.ENV_AES_KEY]
 		)
 		return

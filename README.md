@@ -4,8 +4,7 @@
 
 Install and enable the addon. Then set your app ID and encryption key found on the
 Newgrounds project page. You can do this in **Project Settings > Newgrounds**, which
-writes them to a gitignored `.env` file at the project root. The same panel is also
-available from **Project > Tools > Configure Newgrounds App ID and AES Key**:
+writes them to a gitignored `.env` file at the project root:
 
 ```sh
 # .env
@@ -19,10 +18,11 @@ CI environment. On export, the addon embeds them into the game automatically.
 The credentials are deliberately not stored in `ProjectSettings`, so they cannot end up
 in `project.godot`. Add `.env` to your `.gitignore` (this repository already does).
 
-You should also import your medals/scoreboards from Newgrounds:
-
-![Project > Tools > Import Newgrounds Medals & Scoreboards](/images/import.png)
-This will make it possible to get medal/scoreboard names using `NewgroundsIds.ScoreboardId` and `NewgroundsIds.MedalId`.
+You should also import your medals/scoreboards from Newgrounds. Open
+**Project Settings > Newgrounds** and press **Import**, then **Reload project** when the
+import finishes. The `newgrounds_ids.gd` file is generated in the same folder as the
+imported medal resources. This makes it possible to get medal/scoreboard names using
+`NewgroundsIds.ScoreboardId` and `NewgroundsIds.MedalId`.
 
 Once done, you are ready to go! The nodes `NG` and `NGCloudSave` are accessible in code.
 
@@ -66,7 +66,7 @@ NG.on_session_change.connect(session_change)
 # ...
 
 func session_change(s : NewgroundsSession):
-	if s.signed_in():
+	if s.is_signed_in():
 		print("Signed in")
 	else:
 		print("Not signed in")
@@ -95,7 +95,7 @@ func _medal_unlock(medal_id:int):
 ```gdscript
 await NG.scoreboard_submit(id, value)
 print("Score submitted!")
-await NG.scoreboard_submit_time(id, seconds)
+await NG.scoreboard_submit_time(id, milliseconds)
 print("Time submitted!")
 ```
 
@@ -110,7 +110,7 @@ for score in scores:
 
 ## Cloud save & load
 
-The to save a load strings, you can do this:
+To save and load strings, you can do this:
 
 ```gdscript
 var data = "hello hello";
@@ -148,7 +148,7 @@ These nodes require you to have imported medals and scoreboards. They're useful 
 
 To track and unlock a medal add a `NewgroundsMedalUnlocker` node and select
 the medal it should represent in its properties. Call `$Medal.unlock()` to unlock it.
-It also has a signal `on_unlock(medal)`, and the property `unlocked` to check if it's unlocked.
+It also has a signal `on_unlocked(medal)`, and the property `unlocked` to check if it's unlocked.
 
 ### Loading scoreboard scores
 
@@ -171,16 +171,15 @@ There are a few examples in the examples directory. Drag in `newgrounds_debug.ts
 ```gdscript
 NG.components.ping()
 
-NG.components.session_start()
-NG.components.session_check()
-NG.components.session_end()
+NG.components.app_start_session()
+NG.components.app_check_session()
+NG.components.app_end_session()
 
-NG.components.scoreboard_list();
+NG.components.scoreboard_get_boards();
 # optional app_id to get other games' scores
 NG.components.scoreboard_get_scores(id, limit, skip, period, social, user = "", tag = "", app_id = "")
 
-NG.components.scoreboard_submit(id, value)
-NG.components.scoreboard_submit_time(id, seconds)
+NG.components.scoreboard_post_score(id, value)
 
 # optional app_id can be provided to get other games' medals
 NG.components.medal_get_list(app_id = "")
@@ -190,7 +189,7 @@ NG.components.medal_get_medal_score()
 # optional app_id to get other games' save slots
 NG.components.cloudsave_load_slots(app_id = "")
 NG.components.cloudsave_load_slot(slot_id, app_id = "")
-NG.components.cloudsave_get_data(slot_id, app_id = "")
+NG.components.cloudsave_get_data(data_url)
 
 NG.components.cloudsave_set_data(slot_id, data_string)
 NG.components.cloudsave_clear_slot(slot_id)
@@ -200,9 +199,9 @@ You can listen to the request done by these calls:
 
 ```gdscript
 func get_scoreboards():
-	var response = await NG.components.scoreboard_list().on_response
+	var response = await NG.components.scoreboard_get_boards().on_response
 	if response.error:
-		print_error(response.error_message)
+		printerr(response.error_message)
 	else:
 		print(response.data);
 ```

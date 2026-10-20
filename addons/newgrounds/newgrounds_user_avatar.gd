@@ -7,11 +7,12 @@ extends Control
 @onready var session_watcher:NewgroundsSessionWatcher = $NewgroundsSessionWatcher
 
 func _ready():
-	if NG.signed_in:
+	if NG.signed_in and NG.session.user:
 		image.url = NG.session.user.icons.large;
 
 func _on_newgrounds_session_watcher_on_signed_in():
-	image.url = NG.session.user.icons.large;
+	if NG.session.user:
+		image.url = NG.session.user.icons.large;
 	pass
 
 func _on_newgrounds_session_watcher_on_signed_out():

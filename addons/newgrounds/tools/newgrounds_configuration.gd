@@ -2,6 +2,8 @@
 extends Control
 
 signal import_requested
+## Emitted after the generated resources directory setting changes.
+signal medals_dir_changed(old_dir: String, new_dir: String)
 
 const C = preload("res://addons/newgrounds/scripts/newgrounds_consts.gd")
 const DotEnv = preload("res://addons/newgrounds/scripts/newgrounds_dotenv.gd")
@@ -17,9 +19,9 @@ const Config = preload("res://addons/newgrounds/scripts/newgrounds_config.gd")
 
 @onready var resource_dir: LineEdit = $Container/Settings/HBoxContainer/ResourceDir
 
-@onready var import_from_newgrounds: Button = $Container/Settings/VBoxContainer2/VBoxContainer/ImportFromNewgrounds
+@onready var import_from_newgrounds: Button = $Container/Settings/VBoxContainer2/Buttons/ImportFromNewgrounds
 @onready var import_result: Label = $Container/Settings/VBoxContainer2/ImportResult
-@onready var reload_project: Button = $"Container/Settings/VBoxContainer2/VBoxContainer/Reload Project"
+@onready var reload_project: Button = $"Container/Settings/VBoxContainer2/Buttons/Reload Project"
 
 var _loading := false
 var _dir_dialog: EditorFileDialog
@@ -43,7 +45,6 @@ func _ready() -> void:
 	reload_project.pressed.connect(_on_reload_project_pressed)
 	reload_project.visible = false
 	visibility_changed.connect(_on_visibility_changed)
-	_app_id_edit.grab_focus()
 
 func _on_visibility_changed() -> void:
 	if visible:
@@ -131,6 +132,7 @@ func _save_resource_dir() -> void:
 	ProjectSettings.set_setting(C.IMPORTED_MEDALS_LOCATION_PROPERTY, path)
 	ProjectSettings.save()
 	_set_result("Imported medals will be saved to %s." % path)
+	medals_dir_changed.emit(current, path)
 
 func _on_select_dir_pressed() -> void:
 	var current := resource_dir.text.strip_edges()

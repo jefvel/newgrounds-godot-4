@@ -252,8 +252,8 @@ func scoreboard_submit(scoreboard_id: int, score: int) -> NewgroundsScoreboardIt
 	var scr = NewgroundsScoreboardItem.fromDict(req.data)
 	on_highscore_submitted.emit(scoreboard_id, scr)
 	return scr;
-func scoreboard_submit_time(scoreboard_id: int, seconds: float) -> NewgroundsScoreboardItem:
-	return await scoreboard_submit(scoreboard_id, int(seconds * 1000.0))
+func scoreboard_submit_time(scoreboard_id: int, milliseconds: int) -> NewgroundsScoreboardItem:
+	return await scoreboard_submit(scoreboard_id, milliseconds)
 
 ## Medals
 ############

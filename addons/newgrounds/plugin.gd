@@ -134,7 +134,7 @@ func medals_get(res: NewgroundsResponse):
 		var imgReq = NewgroundsImage.new()
 		imgReq.visible = false;
 		add_child(imgReq)
-		imgReq.url = 'https:' + medal.icon_url;
+		imgReq.url = medal.icon_url;
 		imgReq.on_image_loaded.connect(_set_medal_icon.bind(medal, resource_name, imgReq))
 		
 	loadedMedals = true

@@ -54,20 +54,7 @@ var aes = AESContext.new();
 
 const C = preload ("res://addons/newgrounds/scripts/newgrounds_consts.gd")
 func _ready():
-	_load_session();
-	_init_medals();
-	
-	app_id = ProjectSettings.get_setting(C.APP_ID_PROPERTY, "")
-	aes_key = ProjectSettings.get_setting(C.AES_KEY_PROPERTY, "")
 	auto_init = ProjectSettings.get_setting(C.AUTO_INIT_PROPERTY, true);
-	
-	var aes_bytes = Marshalls.base64_to_raw(aes_key)
-	var aes_bits = aes_bytes.size() << 3;
-	
-	assert(aes_bits == 256||aes_bits == 128, "Newgrounds AES Key Required (Assign it in the project settings)")
-	assert(app_id, "Newgrounds App ID Required (Assign it in the project settings)")
-	
-	components.init(app_id, aes_key, session)
 	
 	if auto_init:
 		init();
@@ -87,6 +74,21 @@ func _p(s):
 
 func init():
 	_p("init")
+	
+	_load_session();
+	_init_medals();
+	
+	app_id = ProjectSettings.get_setting(C.APP_ID_PROPERTY, "")
+	aes_key = ProjectSettings.get_setting(C.AES_KEY_PROPERTY, "")
+	
+	var aes_bytes = Marshalls.base64_to_raw(aes_key)
+	var aes_bits = aes_bytes.size() << 3;
+	
+	assert(aes_bits == 256||aes_bits == 128, "Newgrounds AES Key Required (Assign it in the project settings)")
+	assert(app_id, "Newgrounds App ID Required (Assign it in the project settings)")
+	
+	components.init(app_id, aes_key, session)
+	
 	refresh_session()
 
 var _sign_in_request: NewgroundsRequest;

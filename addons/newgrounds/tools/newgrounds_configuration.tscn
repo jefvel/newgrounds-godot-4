@@ -46,7 +46,6 @@ text = "App ID"
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "55263:dOjy5fso"
 placeholder_text = "12345:abcdefg"
 
 [node name="AppSecretLabel" type="Label" parent="Container/Settings/GridContainer" unique_id=401146237]
@@ -58,7 +57,6 @@ text = "AES Key"
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-text = "R989EuHzWn46CC2ZanfW0A=="
 placeholder_text = "ABCABCABACB=="
 secret = true
 

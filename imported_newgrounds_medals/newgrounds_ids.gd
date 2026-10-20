@@ -1,12 +1,11 @@
 # Generated file
-# To generate this, go to 
-# Project > Tools > Import Newgrounds Medals & Scoreboards
+# To regenerate this, open Project Settings > Newgrounds, press "Import",
+# then "Reload project".
 
 class_name NewgroundsIds
 
 enum ScoreboardId {
 	None = 0,
-	BestSoup = 13693,
 
 }
 

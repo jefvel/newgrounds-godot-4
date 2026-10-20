@@ -1,6 +1,9 @@
 # Godot 4+ specific ignores
 .godot/
 
+# Newgrounds credentials, configured in Project > Tools or exported from the environment
+.env
+
 # Godot-specific ignores
 .import/
 export.cfg
@@ -14,8 +17,7 @@ export_presets.cfg
 data_*/
 mono_crash.*.json
 
-addons/newgrounds/imported_medals
-addons/newgrounds/data/newgrounds_ids.gd
+imported_medals
 
 *.sav
 *.tmp

@@ -8,4 +8,3 @@ func _cloud_save():
 	return {
 		"hehe": hehe
 	}
-	pass

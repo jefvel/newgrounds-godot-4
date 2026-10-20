@@ -1,0 +1,146 @@
+[gd_scene format=3 uid="uid://bawyb42qaymav"]
+
+[ext_resource type="Script" uid="uid://e26vte71bwwq" path="res://addons/newgrounds/tools/newgrounds_configuration.gd" id="1_e8qan"]
+
+[node name="NewgroundsConfiguration" type="Control" unique_id=453426541]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_e8qan")
+
+[node name="Container" type="MarginContainer" parent="." unique_id=1027334975]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Settings" type="VBoxContainer" parent="Container" unique_id=1037126008]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="Container/Settings" unique_id=2092473330]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Newgrounds Setup"
+
+[node name="GridContainer" type="GridContainer" parent="Container/Settings" unique_id=1583418762]
+layout_mode = 2
+columns = 2
+
+[node name="AppIdLabel" type="Label" parent="Container/Settings/GridContainer" unique_id=994668545]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_type_variation = &"TooltipLabel"
+text = "App ID"
+
+[node name="AppId" type="LineEdit" parent="Container/Settings/GridContainer" unique_id=160300242]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "12345:abcdefg"
+
+[node name="AppSecretLabel" type="Label" parent="Container/Settings/GridContainer" unique_id=401146237]
+layout_mode = 2
+theme_type_variation = &"TooltipLabel"
+text = "AES Key"
+
+[node name="AppSecret" type="LineEdit" parent="Container/Settings/GridContainer" unique_id=1842302045]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "ABCABCABACB=="
+secret = true
+
+[node name="Control" type="Control" parent="Container/Settings/GridContainer" unique_id=1456615735]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Container/Settings/GridContainer" unique_id=1672437835]
+custom_maximum_size = Vector2(1000, -1)
+layout_mode = 2
+theme_type_variation = &"TooltipLabel"
+text = "These are saved into a file called .env in the root of your project. You will need to re-enter them for every computer you have the project on."
+autowrap_mode = 3
+
+[node name="Status" type="Label" parent="Container/Settings" unique_id=1681454194]
+modulate = Color(1, 1, 1, 0.65)
+custom_minimum_size = Vector2(700, 0)
+custom_maximum_size = Vector2(1000, -1)
+propagate_maximum_size = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.65)
+text = "Stored in res://.env. That file is gitignored and copied into the exported game."
+autowrap_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Container/Settings" unique_id=2513957]
+layout_mode = 2
+theme_override_constants/separation = -6
+
+[node name="AutoInit" type="CheckBox" parent="Container/Settings/VBoxContainer" unique_id=1552363290]
+layout_mode = 2
+button_pressed = true
+text = "Auto init "
+
+[node name="Label" type="Label" parent="Container/Settings/VBoxContainer" unique_id=684251291]
+layout_mode = 2
+theme_type_variation = &"TooltipLabel"
+theme_override_colors/font_color = Color(0.69965345, 0.69965345, 0.69965345, 1)
+theme_override_font_sizes/font_size = 13
+text = "Loads NG and initializes the newgrounds system directly when app starts"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Container/Settings" unique_id=1489917427]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Container/Settings/HBoxContainer" unique_id=1589606095]
+layout_mode = 2
+text = "Generated resources dir"
+
+[node name="ResourceDir" type="LineEdit" parent="Container/Settings/HBoxContainer" unique_id=1965971887]
+custom_minimum_size = Vector2(269, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "res://addons/newgrounds/imported_medals"
+editable = false
+
+[node name="SelectDir" type="Button" parent="Container/Settings/HBoxContainer" unique_id=849230550]
+layout_mode = 2
+text = "Browse"
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="Container/Settings" unique_id=264035457]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Container/Settings/VBoxContainer2" unique_id=1844316154]
+layout_mode = 2
+text = "Medal & Leaderboard Import"
+
+[node name="Buttons" type="HBoxContainer" parent="Container/Settings/VBoxContainer2" unique_id=1130095387]
+layout_mode = 2
+
+[node name="ImportFromNewgrounds" type="Button" parent="Container/Settings/VBoxContainer2/Buttons" unique_id=338671543]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Import"
+
+[node name="Reload Project" type="Button" parent="Container/Settings/VBoxContainer2/Buttons" unique_id=1183157092]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Reload project"
+
+[node name="ImportResult" type="Label" parent="Container/Settings/VBoxContainer2" unique_id=1840581243]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+autowrap_mode = 3
+
+[node name="Docs" type="LinkButton" parent="Container/Settings" unique_id=39152325]
+layout_mode = 2
+text = "Open documentation"
+uri = "https://github.com/jefvel/newgrounds-godot-4/wiki/Quick-Start"

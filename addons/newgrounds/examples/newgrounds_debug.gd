@@ -10,9 +10,6 @@ func _ready():
 func on_saves_synced():
 	print("Saves have been synced")
 
-func test():
-	pass
-
 @onready var user_name = $Profile/UserName
 @onready var user_medal_score = $Profile/UserMedalScore
 
@@ -47,7 +44,7 @@ func _on_check_session_pressed():
 func _on_check_session_2_pressed():
 	var r = await NG.medal_get_list()
 	for m in r:
-		print("%s - unlocked: %s" % [m.name, m.unlocked])
+		print("%s - unlocked: %s" % [m.name, NG.medal_is_unlocked(m.id)])
 	refresh_medal_score()
 	pass # Replace with function body.
 
@@ -80,6 +77,7 @@ func _on_save_slot_pressed():
 func _on_get_slot_data_pressed():
 	var btn = $"Get Slot Data"
 	var orig_text = btn.text
+	print("Loading CloudSave data...")
 	btn.text = "Loading..."
 	await NGCloudSave.load_game()
 	btn.text = orig_text

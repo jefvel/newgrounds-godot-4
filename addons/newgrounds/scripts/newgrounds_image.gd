@@ -2,74 +2,104 @@ extends TextureRect
 
 @export var placeholder: Texture2D = null
 
-@export var url: String: set = _set_url;
+@export var url: String: set = _set_url
 
 static var cached_images := Dictionary()
 
-signal on_image_start_loading();
-signal on_image_loaded(image:Image);
+const MAX_CACHED_IMAGES := 64
+const REQUEST_TIMEOUT := 10.0
 
+signal on_image_start_loading()
+signal on_image_loaded(image: ImageTexture)
+signal on_image_failed()
+
+var request: HTTPRequest
 
 func _ready():
-	texture = placeholder;
+	if texture == null:
+		texture = placeholder
 
-var request: HTTPRequest;
 func _set_url(u):
 	if u == url:
 		return
-	
-	url = u;
-	if !url:
-		texture = placeholder;
+
+	url = u
+	_cancel_request()
+
+	if url.is_empty():
+		texture = placeholder
 		return
-	
-	on_image_start_loading.emit();
-	
-	if request && is_instance_valid(request):
-		request.cancel_request()
-		request.queue_free()
-	
-	if !Engine.is_editor_hint() and cached_images.has(url):
-		texture = cached_images[url]
-		on_image_loaded.emit(texture.get_image());
-		return;
-	
+
+	on_image_start_loading.emit()
+
+	if not Engine.is_editor_hint() and cached_images.has(url):
+		var cached: ImageTexture = cached_images[url]
+		texture = cached
+		on_image_loaded.emit(cached)
+		return
+
 	request = HTTPRequest.new()
+	request.timeout = REQUEST_TIMEOUT
 	add_child(request)
-	request.request_completed.connect(_http_request_completed)
-	# Perform the HTTP request. The URL below returns a PNG image as of writing.
+	request.request_completed.connect(_http_request_completed.bind(request))
+
 	var error = request.request(url)
 	if error != OK:
-		push_error("An error occurred in the HTTP request.")
+		push_error("Newgrounds: could not request image %s (%s)." % [url, error_string(error)])
+		_cancel_request()
+		on_image_failed.emit()
+
+func _cancel_request() -> void:
+	if is_instance_valid(request):
+		request.cancel_request()
 		request.queue_free()
-	
-func _http_request_completed(result, response_code, headers:PackedStringArray, body):
-	if result != HTTPRequest.RESULT_SUCCESS:
-		push_error("Image couldn't be downloaded. Try a different image.")
-	var content_type = 'png'
-	for h in headers:
-		if h.begins_with('content-type'):
-			content_type = h.split(':')[1].split("/")[1]
-			break;
-	var s = size;
+	request = null
+
+func _http_request_completed(result, response_code, headers: PackedStringArray, body, completed_request: HTTPRequest):
+	if is_instance_valid(completed_request):
+		completed_request.queue_free()
+
+	if completed_request != request:
+		return
+	request = null
+
+	if result != HTTPRequest.RESULT_SUCCESS or response_code < 200 or response_code > 299:
+		push_error("Newgrounds: image couldn't be downloaded: %s" % url)
+		on_image_failed.emit()
+		return
+
+	var content_type = "png"
+	for header in headers:
+		var lower := header.to_lower()
+		if lower.begins_with("content-type"):
+			var pieces := lower.split(":", false, 1)
+			if pieces.size() > 1:
+				var mime := pieces[1].split(";")[0].strip_edges().split("/")
+				if mime.size() > 1:
+					content_type = mime[1].strip_edges()
+			break
+
 	var image = Image.new()
-	var error;
-	match (content_type):
-		'png':
+	var error = ERR_FILE_UNRECOGNIZED
+	match content_type:
+		"png":
 			error = image.load_png_from_buffer(body)
-		'webp':
+		"webp":
 			error = image.load_webp_from_buffer(body)
-		'jpg', 'jpeg':
+		"jpg", "jpeg":
 			error = image.load_jpg_from_buffer(body)
-		'svg':
+		"svg":
 			error = image.load_svg_from_buffer(body)
-	
+
 	if error != OK:
-		push_error("Couldn't load the image.")
-	
-	
-	texture = ImageTexture.create_from_image(image)
-	if !Engine.is_editor_hint():
-		cached_images[url] = texture;
-	on_image_loaded.emit(texture);
-	request.queue_free()
+		push_error("Newgrounds: couldn't decode image %s (%s)." % [url, error_string(error)])
+		on_image_failed.emit()
+		return
+
+	var image_texture := ImageTexture.create_from_image(image)
+	texture = image_texture
+	if not Engine.is_editor_hint():
+		if cached_images.size() >= MAX_CACHED_IMAGES:
+			cached_images.clear()
+		cached_images[url] = image_texture
+	on_image_loaded.emit(image_texture)

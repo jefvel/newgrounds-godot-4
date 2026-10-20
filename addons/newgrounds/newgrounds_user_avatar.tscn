@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://dgf2xfu4r0mtd"]
+[gd_scene format=3 uid="uid://dgf2xfu4r0mtd"]
 
 [ext_resource type="Script" uid="uid://bk4qjtl42q6ki" path="res://addons/newgrounds/newgrounds_user_avatar.gd" id="1_3406q"]
 [ext_resource type="Script" uid="uid://2ueiminarn3y" path="res://addons/newgrounds/newgrounds_session_watcher.gd" id="2_1nl04"]
@@ -27,7 +27,7 @@ _data = {
 &"image_loaded": SubResource("Animation_a7pgm")
 }
 
-[node name="NewgroundsUserAvatar" type="Control"]
+[node name="NewgroundsUserAvatar" type="Control" unique_id=997194282]
 layout_mode = 3
 anchor_right = 0.052
 anchor_bottom = 0.093
@@ -38,10 +38,10 @@ grow_vertical = 2
 mouse_filter = 1
 script = ExtResource("1_3406q")
 
-[node name="NewgroundsSessionWatcher" type="Node" parent="."]
+[node name="NewgroundsSessionWatcher" type="Node" parent="." unique_id=704839725]
 script = ExtResource("2_1nl04")
 
-[node name="NewgroundsImage" type="TextureRect" parent="."]
+[node name="NewgroundsImage" type="TextureRect" parent="." unique_id=193404308]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -54,10 +54,8 @@ expand_mode = 1
 script = ExtResource("4_pm24e")
 placeholder = ExtResource("3_bfbd5")
 
-[node name="Animations" type="AnimationPlayer" parent="."]
-libraries = {
-"": SubResource("AnimationLibrary_d4hdt")
-}
+[node name="Animations" type="AnimationPlayer" parent="." unique_id=1599338537]
+libraries/ = SubResource("AnimationLibrary_d4hdt")
 
 [connection signal="on_signed_in" from="NewgroundsSessionWatcher" to="." method="_on_newgrounds_session_watcher_on_signed_in"]
 [connection signal="on_signed_out" from="NewgroundsSessionWatcher" to="." method="_on_newgrounds_session_watcher_on_signed_out"]

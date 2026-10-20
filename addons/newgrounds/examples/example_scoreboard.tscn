@@ -1,15 +1,15 @@
-[gd_scene load_steps=3 format=3 uid="uid://b2rnbblsa42pm"]
+[gd_scene format=3 uid="uid://b2rnbblsa42pm"]
 
 [ext_resource type="Script" uid="uid://25ppk76eoo7f" path="res://addons/newgrounds/examples/example_scoreboard.gd" id="1_nyg48"]
 [ext_resource type="Script" uid="uid://dadd0vv030ilm" path="res://addons/newgrounds/newgrounds_scoreboard.gd" id="1_xju32"]
 
-[node name="ExampleScoreboard" type="ColorRect"]
+[node name="ExampleScoreboard" type="ColorRect" unique_id=1456202938]
 offset_right = 266.0
 offset_bottom = 395.0
 color = Color(0.603922, 0.411765, 0.192157, 1)
 script = ExtResource("1_xju32")
 
-[node name="Control" type="Control" parent="."]
+[node name="Control" type="Control" parent="." unique_id=1565388550]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,7 +21,7 @@ offset_bottom = -17.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Scoreboard Code" type="Control" parent="Control" node_paths=PackedStringArray("data")]
+[node name="Scoreboard Code" type="Control" parent="Control" unique_id=313653828 node_paths=PackedStringArray("data")]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -31,14 +31,14 @@ grow_vertical = 2
 script = ExtResource("1_nyg48")
 data = NodePath("../..")
 
-[node name="Control2" type="Control" parent="Control/Scoreboard Code"]
+[node name="Control2" type="Control" parent="Control/Scoreboard Code" unique_id=2019816529]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 31.0
 grow_horizontal = 2
 
-[node name="Period" type="OptionButton" parent="Control/Scoreboard Code/Control2"]
+[node name="Period" type="OptionButton" parent="Control/Scoreboard Code/Control2" unique_id=1204146909]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,7 +47,7 @@ offset_right = -127.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Refresh" type="Button" parent="Control/Scoreboard Code/Control2"]
+[node name="Refresh" type="Button" parent="Control/Scoreboard Code/Control2" unique_id=1225819208]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -57,7 +57,7 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Refresh"
 
-[node name="ItemList" type="ItemList" parent="Control/Scoreboard Code"]
+[node name="ItemList" type="ItemList" parent="Control/Scoreboard Code" unique_id=1182678848]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -68,7 +68,7 @@ grow_horizontal = 2
 grow_vertical = 2
 allow_reselect = true
 
-[node name="LoadingIndicator" type="ColorRect" parent="Control/Scoreboard Code/ItemList"]
+[node name="LoadingIndicator" type="ColorRect" parent="Control/Scoreboard Code/ItemList" unique_id=785100610]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -78,7 +78,7 @@ grow_vertical = 2
 color = Color(0.223529, 0.223529, 0.223529, 0.231373)
 metadata/_edit_group_ = true
 
-[node name="LoadingText" type="Label" parent="Control/Scoreboard Code/ItemList/LoadingIndicator"]
+[node name="LoadingText" type="Label" parent="Control/Scoreboard Code/ItemList/LoadingIndicator" unique_id=1407837264]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -89,7 +89,7 @@ text = "Loading"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Control" type="Control" parent="Control/Scoreboard Code"]
+[node name="Control" type="Control" parent="Control/Scoreboard Code" unique_id=1955369184]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -99,7 +99,7 @@ offset_top = -43.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Previous Page" type="Button" parent="Control/Scoreboard Code/Control"]
+[node name="Previous Page" type="Button" parent="Control/Scoreboard Code/Control" unique_id=953971947]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -109,7 +109,7 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Previous Page"
 
-[node name="Next Page" type="Button" parent="Control/Scoreboard Code/Control"]
+[node name="Next Page" type="Button" parent="Control/Scoreboard Code/Control" unique_id=319914787]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -119,7 +119,7 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Next Page"
 
-[node name="Scoreboard Name" type="Label" parent="."]
+[node name="Scoreboard Name" type="Label" parent="." unique_id=1944693986]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0

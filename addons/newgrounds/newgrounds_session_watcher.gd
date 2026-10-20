@@ -31,11 +31,13 @@ func _ready():
 	pass
 
 func refresh_session():
-	if !NG.refreshing_session:
-		if NG.signed_in:
-			on_signed_in.emit();
-		else:
-			NG.refresh_session()
+	if NG.refreshing_session:
+		return
+	if NG.signed_in:
+		signed_in = true
+		on_signed_in.emit();
+	else:
+		NG.refresh_session()
 	pass
 
 func _session_change(s: NewgroundsSession):

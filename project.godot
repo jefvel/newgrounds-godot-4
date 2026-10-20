@@ -17,6 +17,10 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 config/name="newgrounds.io"
 run/main_scene="res://addons/newgrounds/examples/newgrounds_debug.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(1, 0.70980394, 0.05490196, 1)
+boot_splash/stretch_mode=0
+boot_splash/image="uid://dt2au5eau4fw6"
+config/icon="uid://dt2au5eau4fw6"
 
 [autoload]
 

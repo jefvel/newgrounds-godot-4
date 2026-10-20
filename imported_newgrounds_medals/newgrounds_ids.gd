@@ -6,12 +6,15 @@ class_name NewgroundsIds
 
 enum ScoreboardId {
 	None = 0,
+
 }
 
 enum MedalId {
 	None = 0,
+
 }
 
 class MedalIdsToResource:
 	const medals = {
+
 	}

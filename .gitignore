@@ -17,8 +17,7 @@ export_presets.cfg
 data_*/
 mono_crash.*.json
 
-addons/newgrounds/imported_medals/*
-!addons/newgrounds/imported_medals/newgrounds_ids.gd
+imported_medals
 
 *.sav
 *.tmp

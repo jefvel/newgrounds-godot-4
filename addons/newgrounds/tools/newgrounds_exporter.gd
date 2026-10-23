@@ -47,7 +47,7 @@ func _export_begin(_features: PackedStringArray, _is_debug: bool, _path: String,
 func _get_export_options(platform: EditorExportPlatform) -> Array[Dictionary]:
 	if platform is not EditorExportPlatformWeb:
 		return []
-	
+
 	return [
 		{
 			"option": {

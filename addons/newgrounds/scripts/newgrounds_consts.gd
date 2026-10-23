@@ -26,3 +26,6 @@ const IDS_FILE_NAME 			= "newgrounds_ids.gd"
 
 const LEGACY_IDS_FILE_PATH 	= "res://addons/newgrounds/data/newgrounds_ids.gd"
 const MEDALS_PATH 			= "res://imported_newgrounds_medals"
+
+# Names of custom export options
+const EXPORT_CREDENTIALS_EXPORT_OPTION = "newgrounds.io/export_newgrounds_credentials"

@@ -8,6 +8,14 @@ func _get_name() -> String:
 	return "NewgroundsConfig"
 
 func _export_begin(_features: PackedStringArray, _is_debug: bool, _path: String, _flags: int) -> void:
+	if get_export_platform() is not EditorExportPlatformWeb:
+		print("Newgrounds: Platform is not Web. Exporting without credentials.")
+		return
+
+	if not get_option(C.EXPORT_CREDENTIALS_EXPORT_OPTION):
+		print("Newgrounds: %s is false. Exporting without credentials." % C.EXPORT_CREDENTIALS_EXPORT_OPTION)
+		return
+
 	Config.reload()
 
 	var app_id := Config.app_id()
@@ -35,6 +43,20 @@ func _export_begin(_features: PackedStringArray, _is_debug: bool, _path: String,
 
 	if _env_is_tracked_by_git():
 		push_warning("Newgrounds: %s is tracked by git. Add it to .gitignore so the credentials are not committed." % C.ENV_FILE)
+
+func _get_export_options(platform: EditorExportPlatform) -> Array[Dictionary]:
+	if platform is not EditorExportPlatformWeb:
+		return []
+
+	return [
+		{
+			"option": {
+				"name": C.EXPORT_CREDENTIALS_EXPORT_OPTION,
+				"type": TYPE_BOOL
+			},
+			"default_value": true
+		}
+	]
 
 func _env_is_tracked_by_git() -> bool:
 	if not FileAccess.file_exists(C.ENV_FILE):
